@@ -169,7 +169,8 @@ public class TupleDesc implements Serializable {
     public int getSize() {
         int sum = 0;
         for (int i = 0; i < TDarray.size(); i++){
-            sum += (TDarray.get(i).fieldType).;
+            sum += (TDarray.get(i).fieldType).getLen();
+            sum += (TDarray.get(i).fieldName).length();
         }
         //TODO:: FINISH THIS FUNCTION
         return sum;
@@ -222,8 +223,31 @@ public class TupleDesc implements Serializable {
      * @return true if the object is equal to this TupleDesc.
      */
     public boolean equals(Object o) {
-        //we can only compare to string
+        //we can only compare to string, so we need to parse
+        String dataO = o.toString();
+        String dataThis = this.toString();
 
+        String delims = "[ (),]+";
+
+        //strings configured TYPE(NAME), TYPE (NAME)
+        //for each element of this array
+
+        //break the strings into tokens of type and name
+        String[] tokensO = dataO.split(delims);
+        String[] tokensThis = dataThis.split(delims);
+
+        //if they are different sizes
+        if (tokensO.length != tokensThis.length)
+            return false;
+
+        //check if they have identical types
+        for (int i =0; i<(2*this.numFields()); i+=2){
+            if (tokensO[i] != tokensThis[i]){       //if they are mismatched
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public int hashCode() {
@@ -244,7 +268,10 @@ public class TupleDesc implements Serializable {
         String toReturn = "";
         for (int i = 0; i < TDarray.size(); i++){
             //converts item to string and appends to string
-            toReturn += TDarray.get(i).toString() + ",";
+            if (i ==TDarray.size()-1)
+                toReturn += TDarray.get(i).toString();
+            else
+                toReturn += TDarray.get(i).toString() + " , ";
         }
         return toReturn;
     }
