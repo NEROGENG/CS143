@@ -14,6 +14,9 @@ public class Tuple implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private TupleDesc TD;
+    private Field[] FA;
+    private RecordId RID;
+
     /**
      * Create a new tuple with the specified schema (type).
      * 
@@ -22,7 +25,9 @@ public class Tuple implements Serializable {
      *            instance with at least one field.
      */
     public Tuple(TupleDesc td) {
+
         TD = td;
+        FA = new Field[TD.numFields()];
     }
 
     /**
@@ -38,7 +43,7 @@ public class Tuple implements Serializable {
      */
     public RecordId getRecordId() {
         // some code goes here
-        return null;
+        return this.RID;
     }
 
     /**
@@ -49,6 +54,7 @@ public class Tuple implements Serializable {
      */
     public void setRecordId(RecordId rid) {
         // some code goes here
+        this.RID = rid;
     }
 
     /**
@@ -61,6 +67,11 @@ public class Tuple implements Serializable {
      */
     public void setField(int i, Field f) {
         // some code goes here
+        //check if valid
+        if (i <0 || i > TD.numFields()) {}
+            //do nothing
+        else //assign f to FA
+            this.FA[i] = f;
     }
 
     /**
@@ -71,7 +82,11 @@ public class Tuple implements Serializable {
      */
     public Field getField(int i) {
         // some code goes here
-        return null;
+        if (i < 0 || i > TD.numFields()){
+            return null;
+        }
+        else
+            return FA[i];
     }
 
     /**
@@ -84,7 +99,16 @@ public class Tuple implements Serializable {
      */
     public String toString() {
         // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+        //throw new UnsupportedOperationException("Implement this");
+        String toReturn ="";
+
+        //have to sepearate contents into columns with \t
+        for (int i = 0 ; i < TD.numFields(); i++){
+            //add field and then '\t'
+            toReturn += FA[i].toString() +"\t";
+        }
+        toReturn += "\n";
+        return toReturn;
     }
     
     /**
@@ -94,14 +118,37 @@ public class Tuple implements Serializable {
     public Iterator<Field> fields()
     {
         // some code goes here
-        return null;
+        //return null;
+        class toReturn implements Iterator<Field>{
+            public toReturn(Tuple tup){
+                this.tup = tup;
+                this.index = 0;
+            }
+            public Field next(){
+                return this.tup.FA[index++];
+            }
+            public void remove(){
+
+            }
+            public boolean hasNext(){
+                if (index < this.tup.TD.numFields())
+                    return true;
+                else
+                    return false;
+            }
+            public int index;
+            public Tuple tup;
+        }
+        return new toReturn(this);
     }
     
     /**
-     * reset the TupleDesc of thi tuple
+     * reset the TupleDesc of this tuple
      * */
     public void resetTupleDesc(TupleDesc td)
     {
-        // some code goes here
+        FA = null;
+        TD = null;
+        RID = null;
     }
 }

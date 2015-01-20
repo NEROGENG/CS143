@@ -1,5 +1,7 @@
 package simpledb;
 
+import com.sun.org.apache.xalan.internal.xsltc.dom.ArrayNodeListIterator;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -8,7 +10,8 @@ import java.util.*;
  */
 public class TupleDesc implements Serializable {
 
-    public List <TDItem> TDarray;
+    public ArrayList <TDItem> TDarray;
+    public Iterator<TDItem> TDIterator;
     /**
      * A help class to facilitate organizing the information of each field
      * */
@@ -44,7 +47,7 @@ public class TupleDesc implements Serializable {
     public Iterator<TDItem> iterator() {
         // some code goes here
         //return null;
-        return TDarray.listIterator();
+        return TDIterator;
     }
 
     private static final long serialVersionUID = 1L;
@@ -63,6 +66,7 @@ public class TupleDesc implements Serializable {
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
         // some code goes here
         TDarray = new ArrayList<TDItem>();
+        TDIterator = TDarray.iterator();
         for (int i = 0; i < typeAr.length; i++){
             TDItem temp = new TDItem(typeAr[i], fieldAr[i]);
             TDarray.add(temp);
@@ -79,6 +83,7 @@ public class TupleDesc implements Serializable {
      */
     public TupleDesc(Type[] typeAr) {
         TDarray = new ArrayList<TDItem>();
+        TDIterator = TDarray.iterator();
         //for the number of items in array
         for (int i = 0; i < typeAr.length; i++) {
             //create new item and add to array list
@@ -170,7 +175,6 @@ public class TupleDesc implements Serializable {
         int sum = 0;
         for (int i = 0; i < TDarray.size(); i++){
             sum += (TDarray.get(i).fieldType).getLen();
-            sum += (TDarray.get(i).fieldName).length();
         }
         //TODO:: FINISH THIS FUNCTION
         return sum;
@@ -224,6 +228,7 @@ public class TupleDesc implements Serializable {
      */
     public boolean equals(Object o) {
         //we can only compare to string, so we need to parse
+        /*
         String dataO = o.toString();
         String dataThis = this.toString();
 
@@ -247,6 +252,13 @@ public class TupleDesc implements Serializable {
             }
         }
 
+        return true;
+        */
+        if (((TupleDesc)o).numFields() != this.numFields())
+            return false;
+        else{
+
+        }
         return true;
     }
 
