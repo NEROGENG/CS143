@@ -18,13 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
-    public HashMap<Integer, DbFile> IDFileMap;
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
     public Catalog() {
-        IDFileMap = new HashMap<Integer, DbFile>();
+        // some code goes here
     }
 
     /**
@@ -38,12 +37,6 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
-        int id  = file.getId();
-        //TODO: what is this id, what does catalog need in table
-        // hashmap between all values
-
-        IDFileMap.put()
-
     }
 
     public void addTable(DbFile file, String name) {
