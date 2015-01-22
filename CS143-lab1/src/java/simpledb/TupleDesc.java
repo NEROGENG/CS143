@@ -87,8 +87,8 @@ public class TupleDesc implements Serializable {
         //for the number of items in array
         for (int i = 0; i < typeAr.length; i++) {
             //create new item and add to array list
-            TDItem temp = new TDItem(typeAr[i], "");
-            TDarray.add(temp);
+
+            TDarray.add(new TDItem(typeAr[i], ""));
         }
         // some code goes here
     }
@@ -119,7 +119,7 @@ public class TupleDesc implements Serializable {
         // some code goes here
         //return null;
         //if index is invalid
-        if (i < 0 || i > (TDarray.size()-1)){
+        if (i < 0 || i >= (TDarray.size())){
             throw new NoSuchElementException();
         }
         else
@@ -139,7 +139,7 @@ public class TupleDesc implements Serializable {
     public Type getFieldType(int i) throws NoSuchElementException {
         // some code goes here
         //return null;
-        if (i <0 || i > (TDarray.size()-1)){
+        if (i <0 || i >= (TDarray.size())){
             throw new NoSuchElementException();
         }
         else
@@ -158,13 +158,29 @@ public class TupleDesc implements Serializable {
     public int fieldNameToIndex(String name) throws NoSuchElementException {
         // some code goes here
         //return 0;
-        //for each eleemnt of TD array, find if
-        for (int i = 0; i < TDarray.size(); i++){
-            if(TDarray.get(i).fieldName == name)
+        //for each eleemnt of TD array, find if ther eis a match
+
+        for (int i = 0; i < TDarray.size(); i++)
+        {
+            //if null bucket,
+            if (this.getFieldName(i) == null)
+            {
+                if (name == null)
+                {
+                    throw new NoSuchElementException();
+                }
+            }
+            //if there is  match return index
+            else if (this.getFieldName(i).equals(name))
+            {
                 return i;
+            }
+
         }
-        //else if we haven't found it, we throw exception
+
         throw new NoSuchElementException();
+        //else if we haven't found it, we throw exception
+
     }
 
     /**
@@ -228,37 +244,28 @@ public class TupleDesc implements Serializable {
      */
     public boolean equals(Object o) {
         //we can only compare to string, so we need to parse
-        /*
-        String dataO = o.toString();
-        String dataThis = this.toString();
 
-        String delims = "[ (),]+";
-
-        //strings configured TYPE(NAME), TYPE (NAME)
-        //for each element of this array
-
-        //break the strings into tokens of type and name
-        String[] tokensO = dataO.split(delims);
-        String[] tokensThis = dataThis.split(delims);
-
-        //if they are different sizes
-        if (tokensO.length != tokensThis.length)
+        //check for null
+        if (o == null)
             return false;
 
-        //check if they have identical types
-        for (int i =0; i<(2*this.numFields()); i+=2){
-            if (tokensO[i] != tokensThis[i]){       //if they are mismatched
+        try {
+            //if there is a mismatch
+            if (((TupleDesc) o).numFields() != this.numFields())
                 return false;
+            else {
+                //check for the same types
+                for (int i = 0; i < this.numFields(); i++) {
+                    //if there is a mismatch on type
+                    if (!((TupleDesc) o).getFieldType(i).equals(this.getFieldType(i))) {
+                        return false;
+                    }
+                }
             }
+        }catch(Exception e){
+        return false;
         }
-
-        return true;
-        */
-        if (((TupleDesc)o).numFields() != this.numFields())
-            return false;
-        else{
-
-        }
+        //return true if number matches and everything fits
         return true;
     }
 
