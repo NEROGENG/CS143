@@ -1,7 +1,5 @@
 package simpledb;
 
-import com.sun.org.apache.xalan.internal.xsltc.dom.ArrayNodeListIterator;
-
 import java.io.Serializable;
 import java.util.*;
 
