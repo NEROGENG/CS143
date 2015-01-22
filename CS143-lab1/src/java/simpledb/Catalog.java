@@ -18,12 +18,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
+    public HashMap<Integer, DbFile> intfile;
+    public HashMap<Integer, String> intname;
+    public HashMap<Integer, String> pkeyField;
+    public HashMap<String, DbFile> filename;
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
+
     public Catalog() {
-        // some code goes here
+        intfile = new HashMap<Integer, DbFile>();
+        intname = new HashMap<Integer, String>();
+        pkeyField = new HashMap<Integer, String>();
+        filename = new HashMap<String, DbFile>();
     }
 
     /**
@@ -36,7 +44,7 @@ public class Catalog {
      * conflict exists, use the last table to be added as the table for a given name.
      */
     public void addTable(DbFile file, String name, String pkeyField) {
-        // some code goes here
+        //name may be empty or null
     }
 
     public void addTable(DbFile file, String name) {

@@ -159,11 +159,21 @@ public class TupleDesc implements Serializable {
         // some code goes here
         //return 0;
         //for each eleemnt of TD array, find if
-        for (int i = 0; i < TDarray.size(); i++){
-            if(TDarray.get(i).fieldName == name)
+
+        for (int i = 0; i < TDarray.size(); i ++){
+            //if the name is null we treat special
+            if (this.getFieldName(i) == null){
+                if (name == null){
+                    throw new NoSuchElementException();
+                }
+
+            }
+            else if (this.getFieldName(i).equals(name)) {
                 return i;
+            }
+            
         }
-        //else if we haven't found it, we throw exception
+
         throw new NoSuchElementException();
     }
 
