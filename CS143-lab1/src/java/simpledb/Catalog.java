@@ -20,7 +20,7 @@ public class Catalog {
 
     public HashMap<Integer, DbFile> intfile;
     public HashMap<Integer, String> intname;
-    public HashMap<Integer, String> pkeyField;
+    public HashMap<Integer, String> pKeyField;
     public HashMap<String, DbFile> filename;
     /**
      * Constructor.
@@ -30,7 +30,7 @@ public class Catalog {
     public Catalog() {
         intfile = new HashMap<Integer, DbFile>();
         intname = new HashMap<Integer, String>();
-        pkeyField = new HashMap<Integer, String>();
+        pKeyField = new HashMap<Integer, String>();
         filename = new HashMap<String, DbFile>();
     }
 
@@ -45,6 +45,16 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         //name may be empty or null
+        //check if it is
+        if (name == null){
+
+        }
+        //file.getID is the identifier of file
+        int id = file.getId();
+        intfile.put(id, file); //relate id with file
+        intname.put(id, name); //relate id with name
+        filename.put(name, file); //relate string name with file
+        pKeyField.put(id, pkeyField);//pkeyfield can be empty, see function below
     }
 
     public void addTable(DbFile file, String name) {
@@ -68,7 +78,14 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         // some code goes here
-        return 0;
+        //return 0;
+        //check if a file exists with string name
+        //return file id if available
+        // no hashmap from name -> int, use name ->file -> int
+        if (filename.containsKey(name))
+            return filename.get(name).getId();
+
+        throw new NoSuchElementException();
     }
 
     /**
@@ -79,7 +96,12 @@ public class Catalog {
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        //return null;
+        //given id, find file and call getTupleDesc();
+        if (intfile.containsKey(tableid))
+            return intfile.get(tableid).getTupleDesc();
+        //else
+        throw new NoSuchElementException();
     }
 
     /**
@@ -90,27 +112,50 @@ public class Catalog {
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        //return null;
+        //given id, find file, simple!
+        if (intfile.containsKey(tableid))
+            return intfile.get(tableid);
+        throw new NoSuchElementException();
     }
 
     public String getPrimaryKey(int tableid) {
         // some code goes here
-        return null;
+        //return null;
+        //from int->pKeyField
+        if (pKeyField.containsKey(tableid))
+            return pKeyField.get(tableid);
+        else return "";
+        //defualts to ""
     }
 
+    //table id iterator for....
+    //?????????
+    //int -> file
     public Iterator<Integer> tableIdIterator() {
         // some code goes here
-        return null;
+        //return null;
+        Iterator<Integer> toReturn = (intfile).keySet().iterator();
+        return toReturn;
     }
 
     public String getTableName(int id) {
         // some code goes here
-        return null;
+        //return null;
+        //checking int->name (string)
+        if (intname.containsKey(id))
+            return intname.get(id);
+        return "";
     }
     
     /** Delete all tables from the catalog */
+    //new maps
     public void clear() {
         // some code goes here
+        intfile = new HashMap<Integer, DbFile>();
+        intname = new HashMap<Integer, String>();
+        pKeyField = new HashMap<Integer, String>();
+        filename = new HashMap<String, DbFile>();
     }
     
     /**

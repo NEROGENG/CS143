@@ -171,7 +171,7 @@ public class TupleDesc implements Serializable {
             else if (this.getFieldName(i).equals(name)) {
                 return i;
             }
-            
+
         }
 
         throw new NoSuchElementException();
