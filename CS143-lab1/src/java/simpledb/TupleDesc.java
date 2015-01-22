@@ -68,8 +68,8 @@ public class TupleDesc implements Serializable {
         TDarray = new ArrayList<TDItem>();
         TDIterator = TDarray.iterator();
         for (int i = 0; i < typeAr.length; i++){
-            TDItem temp = new TDItem(typeAr[i], fieldAr[i]);
-            TDarray.add(temp);
+
+            TDarray.add(new TDItem(typeAr[i], fieldAr[i]));
         }
     }
 
@@ -87,8 +87,8 @@ public class TupleDesc implements Serializable {
         //for the number of items in array
         for (int i = 0; i < typeAr.length; i++) {
             //create new item and add to array list
-            TDItem temp = new TDItem(typeAr[i], "");
-            TDarray.add(temp);
+
+            TDarray.add(new TDItem(typeAr[i], ""));
         }
         // some code goes here
     }
@@ -119,7 +119,7 @@ public class TupleDesc implements Serializable {
         // some code goes here
         //return null;
         //if index is invalid
-        if (i < 0 || i > (TDarray.size()-1)){
+        if (i < 0 || i >= (TDarray.size())){
             throw new NoSuchElementException();
         }
         else
@@ -139,7 +139,7 @@ public class TupleDesc implements Serializable {
     public Type getFieldType(int i) throws NoSuchElementException {
         // some code goes here
         //return null;
-        if (i <0 || i > (TDarray.size()-1)){
+        if (i <0 || i >= (TDarray.size())){
             throw new NoSuchElementException();
         }
         else
@@ -228,36 +228,27 @@ public class TupleDesc implements Serializable {
      */
     public boolean equals(Object o) {
         //we can only compare to string, so we need to parse
-        /*
-        String dataO = o.toString();
-        String dataThis = this.toString();
 
-        String delims = "[ (),]+";
 
-        //strings configured TYPE(NAME), TYPE (NAME)
-        //for each element of this array
-
-        //break the strings into tokens of type and name
-        String[] tokensO = dataO.split(delims);
-        String[] tokensThis = dataThis.split(delims);
-
-        //if they are different sizes
-        if (tokensO.length != tokensThis.length)
-            return false;
-
-        //check if they have identical types
-        for (int i =0; i<(2*this.numFields()); i+=2){
-            if (tokensO[i] != tokensThis[i]){       //if they are mismatched
+        if (o== null)
+            if (this == null)
+                return true;
+            else
                 return false;
+        try {
+            //sometimes casting doesn't work, return false if so
+            if (((TupleDesc) o).numFields() != this.numFields())//check for mismatch
+                return false;
+            else {
+                //check each type
+                for (int i = 0; i < TDarray.size(); i++){
+                    if (!((TupleDesc)o).getFieldType(i).equals(this.getFieldType(i)))
+                        return false;
+                }
+                //if everything works, return true
             }
-        }
-
-        return true;
-        */
-        if (((TupleDesc)o).numFields() != this.numFields())
+        }catch (Exception e){
             return false;
-        else{
-
         }
         return true;
     }
