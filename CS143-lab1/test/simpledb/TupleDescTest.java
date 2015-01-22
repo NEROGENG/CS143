@@ -90,6 +90,7 @@ public class TupleDescTest extends SimpleDbTestBase {
         for (int len: lengths) {
             // Make sure you retrieve well-named fields
             TupleDesc td = Utility.getTupleDesc(len, prefix);
+            //len = 1, 2, 1000
             for (int i = 0; i < len; ++i) {
                 assertEquals(i, td.fieldNameToIndex(prefix + i));
             }
