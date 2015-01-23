@@ -123,16 +123,23 @@ public class HeapFile implements DbFile {
             public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
                 if(IT != null){
                     Tuple toReturn = null;//check for another tuple
-                    if(this.hasNext())
-                        toReturn = IT.next();
-                    return toReturn;
+                    if(this.hasNext()) {
+                        toReturn = IT.next();//gets next tuple from buffer page
+                        return toReturn;
+                    }
+                    else
+                        throw new NoSuchElementException();
                 }
-                throw new NoSuchElementException();
+                //if IT is null
+                else{
+                    throw new TransactionAbortedException();
+                }
+
             }
 
             @Override
             public void close() {
-
+                IT = null;
             }
 
             @Override
@@ -153,16 +160,23 @@ public class HeapFile implements DbFile {
                 if (IT == null){
                     //iterator hasn't bee=n declared so open
                     open();
-                    hasNext();//call function again
+                    return hasNext();//call function again
                 }
                 else{//iT declared
-
+                    //check if there is a tuple!
+                    if (IT.hasNext())
+                        return true;
+                    else
+                        return false;
                 }
+
             }
 
             @Override
             public void rewind() throws DbException, TransactionAbortedException {
-
+                //rewinds the iterator back to beginning
+                index = 0;
+                open();
             }
         }
         DBterator temp = new DBterator(this, tid);
