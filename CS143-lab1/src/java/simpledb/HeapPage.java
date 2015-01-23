@@ -336,7 +336,7 @@ public class HeapPage implements Page {
                 {//find next index
                     index++;
                 }
-                if (index == this.HP.getNumTuples() && !HP.isSlotUsed(index)){
+                if (index == this.HP.getNumTuples() || !HP.isSlotUsed(index)){
                     //we reached the end and there is nothing left
                     return false;
                     //index is currently at last spot, and it is taken, its stopped somewhere
@@ -346,7 +346,6 @@ public class HeapPage implements Page {
                     return true;
 
             }
-
 
             public void remove() {
                 //for compiler
