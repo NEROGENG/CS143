@@ -14,7 +14,7 @@ public class Tuple implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private TupleDesc TD;
-    private Field[] FA;
+    private Field[] FA;     //array of fields defined by tupleDesc
     private RecordId RID;
 
     /**
@@ -117,25 +117,33 @@ public class Tuple implements Serializable {
      * */
     public Iterator<Field> fields()
     {
+        //iterator of fields
         // some code goes here
         //return null;
+        //create new class
         class toReturn implements Iterator<Field>{
+
             public toReturn(Tuple tup){
                 this.tup = tup;
                 this.index = 0;
             }
-            public Field next(){
-                return this.tup.FA[index++];
-            }
-            public void remove(){
+
+            public void remove(){//required
 
             }
-            public boolean hasNext(){
-                if (index < this.tup.TD.numFields())
+            public boolean hasNext(){//required, check index with the size
+                if (index < this.tup.TD.numFields())//if there is room, if ==, then at capacity
                     return true;
                 else
                     return false;
             }
+            //goes through all of the fields in the tuple
+            //index keeps track of it
+            public Field next(){
+                return this.tup.FA[index++];
+            }
+
+
             public int index;
             public Tuple tup;
         }

@@ -9,7 +9,8 @@ import java.io.Serializable;
 public class RecordId implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    private PageId PID;
+    private int Tuplenum;
     /**
      * Creates a new RecordId referring to the specified PageId and tuple
      * number.
@@ -21,6 +22,8 @@ public class RecordId implements Serializable {
      */
     public RecordId(PageId pid, int tupleno) {
         // some code goes here
+        PID = pid;
+        Tuplenum = tupleno;
     }
 
     /**
@@ -28,7 +31,7 @@ public class RecordId implements Serializable {
      */
     public int tupleno() {
         // some code goes here
-        return 0;
+        return Tuplenum;
     }
 
     /**
@@ -36,7 +39,7 @@ public class RecordId implements Serializable {
      */
     public PageId getPageId() {
         // some code goes here
-        return null;
+        return PID;
     }
 
     /**
@@ -47,8 +50,22 @@ public class RecordId implements Serializable {
      */
     @Override
     public boolean equals(Object o) {
-        // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        //to represent the same tuple, it has to have the same page id and tuple no
+        //cast object as record id
+        try {
+            if (((RecordId) o).getPageId() == this.getPageId()){
+                if (((RecordId)o).tupleno() == this.tupleno())
+                    return true;
+
+
+            }
+            //if neither if statement works, return false;
+            return false;
+        }catch (Exception e){
+            //if it isn't a record number
+            return false;
+        }
+        //throw new UnsupportedOperationException("implement this");
     }
 
     /**
@@ -60,7 +77,11 @@ public class RecordId implements Serializable {
     @Override
     public int hashCode() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        //throw new UnsupportedOperationException("implement this");
+
+        //has to be unique, unique being spot in pageID and tuple no
+        //represent the page as number
+        return (this.tupleno() + this.getPageId().getTableId());
 
     }
 

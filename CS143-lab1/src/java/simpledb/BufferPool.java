@@ -62,6 +62,9 @@ public class BufferPool {
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         // some code goes here
+        //check many things
+        //check if page is in buffer pool
+        //check if buffer pool is full
         return null;
     }
 

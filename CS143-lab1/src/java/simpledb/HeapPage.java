@@ -67,6 +67,7 @@ public class HeapPage implements Page {
     */
     private int getNumTuples() {        
         // some code goes here
+        //TODO
         return 0;
 
     }
@@ -75,8 +76,8 @@ public class HeapPage implements Page {
      * Computes the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
-    private int getHeaderSize() {        
-        
+    private int getHeaderSize() {
+        //TODO
         // some code goes here
         return 0;
                  
@@ -111,6 +112,7 @@ public class HeapPage implements Page {
      * @return the PageId associated with this page.
      */
     public HeapPageId getId() {
+        //TODO
     // some code goes here
     throw new UnsupportedOperationException("implement this");
     }
@@ -282,6 +284,7 @@ public class HeapPage implements Page {
      */
     public int getNumEmptySlots() {
         // some code goes here
+        //TODO
         return 0;
     }
 
@@ -290,6 +293,7 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         // some code goes here
+        //TODO
         return false;
     }
 
@@ -307,7 +311,34 @@ public class HeapPage implements Page {
      */
     public Iterator<Tuple> iterator() {
         // some code goes here
-        return null;
+        //TODO
+        class Tuplerator implements Iterator<Tuple>{
+            public Tuplerator(HeapPage HP){
+                this.HP = HP;
+                this.Index = 0;
+
+            }
+            public void remove(){
+                //satisfy compiler
+            }
+            public Tuple next(){
+
+                    return HP.tuples[Index++];
+                    //return tuple object
+
+            }
+            public boolean hasNext(){
+                if (this.Index < this.HP.numSlots)
+                    return true;
+                else
+                    return false;
+
+            }
+            private int Index;
+            private HeapPage HP;
+        }
+        Tuplerator temp = new Tuplerator(this);
+        return temp;
     }
 
 }
