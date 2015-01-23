@@ -68,7 +68,7 @@ public class HeapPage implements Page {
     */
     private int getNumTuples() {        
         // some code goes here
-        return (int)Math.floor((Database.getBufferPool().getPageSize() * 8) 
+        return (int)Math.floor((BufferPool.getPageSize() * 8) 
             / (td.getSize() * 8 + 1));
 
     }
@@ -322,7 +322,7 @@ public class HeapPage implements Page {
         class Tuplerator implements Iterator<Tuple>{
             public Tuplerator(HeapPage HP){
                 this.HP = HP;
-                this.Index = 0;
+                this.index = 0;
 
             }
             public void remove(){
@@ -330,19 +330,30 @@ public class HeapPage implements Page {
             }
             public Tuple next(){
                 if (hasNext())
-                    return HP.tuples[Index++];
+                    return HP.tuples[index++];
                     //return tuple object
                 else
                     return null;
             }
             public boolean hasNext(){
-                if (this.Index + 1 < this.HP.getNumTuples())
-                    return true;
-                else
+                // checks if there is a tuple after the current index
+                // there are slots that are not taken, check for those
+
+                while (this.index < this.HP.getNumTuples() && !HP.isSlotUsed(index))
+                {//find next index
+                    index++;
+                }
+                if (index == this.HP.getNumTuples() || !HP.isSlotUsed(index)){
+                    //we reached the end and there is nothing left
                     return false;
+                    //index is currently at last spot, and it is taken, its stopped somewhere
+
+                }
+                else
+                    return true;
 
             }
-            private int Index;
+            private int index;
             private HeapPage HP;
         }
         Tuplerator temp = new Tuplerator(this);

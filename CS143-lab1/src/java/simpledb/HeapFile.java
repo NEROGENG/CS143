@@ -14,7 +14,9 @@ import java.util.*;
  * @author Sam Madden
  */
 public class HeapFile implements DbFile {
-
+    private File BF;
+    private TupleDesc TD;
+    private int pageSize;
     /**
      * Constructs a heap file backed by the specified file.
      * 
@@ -24,6 +26,9 @@ public class HeapFile implements DbFile {
      */
     public HeapFile(File f, TupleDesc td) {
         // some code goes here
+        BF = f;
+        TD = td;
+        pageSize = BufferPool.getPageSize();
     }
 
     /**
@@ -33,7 +38,7 @@ public class HeapFile implements DbFile {
      */
     public File getFile() {
         // some code goes here
-        return null;
+        return BF;
     }
 
     /**
@@ -47,7 +52,8 @@ public class HeapFile implements DbFile {
      */
     public int getId() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        // throw new UnsupportedOperationException("implement this");
+        return BF.getAbsoluteFile().hashCode();
     }
 
     /**
@@ -57,13 +63,26 @@ public class HeapFile implements DbFile {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        // throw new UnsupportedOperationException("implement this");
+        return TD;
     }
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
         // some code goes here
-        return null;
+        try {
+            RandomAccessFile RAF = new RandomAccessFile(BF, "r");
+            int offset = pid.pageNumber() * pageSize;
+            byte[] data = new byte[pageSize];
+            int result = RAF.read(data, offset, pageSize);
+            if (result != pageSize)
+                return null;
+            else
+                return new HeapPage((HeapPageId)pid, data);
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     // see DbFile.java for javadocs
@@ -77,7 +96,7 @@ public class HeapFile implements DbFile {
      */
     public int numPages() {
         // some code goes here
-        return 0;
+        return ((int)BF.length()) / pageSize;
     }
 
     // see DbFile.java for javadocs
