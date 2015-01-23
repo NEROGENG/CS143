@@ -2,6 +2,7 @@ package simpledb;
 
 import java.util.*;
 import java.io.*;
+import java.lang.Math;
 
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and 
@@ -48,7 +49,7 @@ public class HeapPage implements Page {
         header = new byte[getHeaderSize()];
         for (int i=0; i<header.length; i++)
             header[i] = dis.readByte();
-        
+
         tuples = new Tuple[numSlots];
         try{
             // allocate and read the actual records of this page
@@ -63,12 +64,12 @@ public class HeapPage implements Page {
     }
 
     /** Retrieve the number of tuples on this page.
-        @return the number of tuples on this page
-    */
-    private int getNumTuples() {        
+     @return the number of tuples on this page
+     */
+    private int getNumTuples() {
         // some code goes here
-        //TODO
-        return 0;
+        return (int)Math.floor((Database.getBufferPool().getPageSize() * 8)
+                / (td.getSize() * 8 + 1));
 
     }
 
@@ -77,14 +78,14 @@ public class HeapPage implements Page {
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
     private int getHeaderSize() {
-        //TODO
+
         // some code goes here
-        return 0;
-                 
+        return (int)Math.ceil(getNumTuples() / 8);
+
     }
-    
+
     /** Return a view of this page before it was modified
-        -- used by recovery */
+     -- used by recovery */
     public HeapPage getBeforeImage(){
         try {
             byte[] oldDataRef = null;
@@ -100,11 +101,11 @@ public class HeapPage implements Page {
         }
         return null;
     }
-    
+
     public void setBeforeImage() {
         synchronized(oldDataLock)
         {
-        oldData = getPageData().clone();
+            oldData = getPageData().clone();
         }
     }
 
@@ -112,9 +113,9 @@ public class HeapPage implements Page {
      * @return the PageId associated with this page.
      */
     public HeapPageId getId() {
-        //TODO
-    // some code goes here
-    throw new UnsupportedOperationException("implement this");
+        // some code goes here
+        //throw new UnsupportedOperationException("implement this");
+        return pid;
     }
 
     /**
@@ -198,7 +199,7 @@ public class HeapPage implements Page {
                 Field f = tuples[i].getField(j);
                 try {
                     f.serialize(dos);
-                
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -267,7 +268,7 @@ public class HeapPage implements Page {
      */
     public void markDirty(boolean dirty, TransactionId tid) {
         // some code goes here
-	// not necessary for lab1
+        // not necessary for lab1
     }
 
     /**
@@ -275,8 +276,8 @@ public class HeapPage implements Page {
      */
     public TransactionId isDirty() {
         // some code goes here
-	// Not necessary for lab1
-        return null;      
+        // Not necessary for lab1
+        return null;
     }
 
     /**
@@ -284,8 +285,12 @@ public class HeapPage implements Page {
      */
     public int getNumEmptySlots() {
         // some code goes here
-        //TODO
-        return 0;
+        int sum = 0;
+        for (int i = 0; i < numSlots; i++) {
+            if (!isSlotUsed(i))
+                sum++;
+        }
+        return sum;
     }
 
     /**
@@ -293,8 +298,11 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         // some code goes here
-        //TODO
-        return false;
+        // if (i >= numSlots || i < 0)
+        //     return true;
+        int byteNum = i / 8;
+        int bitNum = i % 8;
+        return (header[byteNum] & (1 << bitNum)) != 0;
     }
 
     /**
@@ -305,41 +313,55 @@ public class HeapPage implements Page {
         // not necessary for lab1
     }
 
+
     /**
      * @return an iterator over all tuples on this page (calling remove on this iterator throws an UnsupportedOperationException)
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
     public Iterator<Tuple> iterator() {
         // some code goes here
-        //TODO
         class Tuplerator implements Iterator<Tuple>{
-            public Tuplerator(HeapPage HP){
-                this.HP = HP;
-                this.Index = 0;
+            private int index;
+            private HeapPage HP;
 
-            }
-            public void remove(){
-                //satisfy compiler
-            }
-            public Tuple next(){
-
-                    return HP.tuples[Index++];
-                    //return tuple object
-
+            public Tuplerator(HeapPage hp) {
+                this.index = 0;
+                HP = hp;
             }
             public boolean hasNext(){
-                if (this.Index < this.HP.numSlots)
-                    return true;
-                else
+                //checks if there is a tuple after the current index
+                // there are slots that are not taken, check for those
+
+                while (this.index < this.HP.getNumTuples() && !HP.isSlotUsed(index))
+                {//find next index
+                    index++;
+                }
+                if (index == this.HP.getNumTuples() && !HP.isSlotUsed(index)){
+                    //we reached the end and there is nothing left
                     return false;
+                    //index is currently at last spot, and it is taken, its stopped somewhere
+
+                }
+                else
+                    return true;
 
             }
-            private int Index;
-            private HeapPage HP;
+
+
+            public void remove() {
+                //for compiler
+            }
+
+
+            public Tuple next() {
+                if (!hasNext())
+                    return null;
+                else
+                    return HP.tuples[index++];
+            }
         }
         Tuplerator temp = new Tuplerator(this);
         return temp;
     }
 
 }
-
