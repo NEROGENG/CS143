@@ -118,8 +118,85 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public DbFileIterator iterator(TransactionId tid) {
         // some code goes here
-        return null;
+        class DBterator implements DbFileIterator{
+            private int index;
+            private HeapFile HF;
+            private TransactionId TID;
+            private Iterator<Tuple> IT;
+
+            public DBterator(HeapFile hf, TransactionId tid){
+                TID = tid;
+                HF = hf;
+                index = 0;
+                IT = null;
+            }
+            @Override
+            //returns next tuple, needs tuple iterator
+            public boolean hasNext() throws DbException, TransactionAbortedException {
+                if (IT == null){
+                    //iterator hasn't bee=n declared so open
+                   return false;
+                }
+                else{//iT declared
+                    //check if there is a tuple!
+                    if (IT.hasNext())
+                        return true;
+                    else
+                        return false;
+                }
+
+
+            }
+
+            @Override
+            public void close() {
+                IT = null;
+            }
+
+            @Override
+            //starts the iterator.
+            public void open() throws DbException, TransactionAbortedException {
+                //open creates the iterator
+                HeapPage HP;// use getPage(TransactionId tid, PageId pid, Permissions perm)
+                //page id = from heap file
+                //page no?
+                //get bufferpool from database class
+                HeapPageId ID = new HeapPageId(HF.getId(),index);
+                HP = ((HeapPage)(Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY)));
+                //System.out.println(Arrays.toString(HP.getPageData()));
+                IT = HP.iterator();
+                System.out.println(IT == null);
+            }
+
+            @Override
+            public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
+                if(IT != null){
+                    Tuple toReturn = null;//check for another tuple
+                    if(this.hasNext()) {
+                        toReturn = IT.next();//gets next tuple from buffer page
+                        return toReturn;
+                    }
+                    else
+                        throw new NoSuchElementException();
+                }
+                //if IT is null
+                else{
+                    throw new NoSuchElementException();
+                }
+
+            }
+
+            @Override
+            public void rewind() throws DbException, TransactionAbortedException {
+                //rewinds the iterator back to beginning
+                index = 0;
+                open();
+            }
+        }
+        DBterator temp = new DBterator(this, tid);
+        return temp;
     }
+
 
 }
 

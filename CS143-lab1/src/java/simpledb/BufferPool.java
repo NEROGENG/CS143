@@ -72,21 +72,23 @@ public class BufferPool {
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         // some code goes here
-        if (perm.toString().equals("UNKNOWN"))  // ignore permissions for now
-            return null;
-
-        if (intPage.get(pid.hashCode()) == null) {
+        // if (perm.toString().equals("UNKNOWN"))  // ignore permissions for now
+        //     return null;
+        int pidHashCode = pid.hashCode();
+        Page target = intPage.get(pidHashCode);
+        if (target == null) {
             if (numInUse == NP)
                 throw new DbException("No eviction policy");
             else {
-                intPage.put(pid.hashCode(), Database.getCatalog()
-                    .getDatabaseFile(pid.getTableId()).readPage(pid));
+                DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
+                target = databaseFile.readPage(pid);
+                intPage.put(pidHashCode, target);
                 numInUse++;
-                return intPage.get(pid.hashCode());
+                return target;
             }
         }
         else
-            return intPage.get(pid.hashCode());
+            return target;
     }
 
     /**
