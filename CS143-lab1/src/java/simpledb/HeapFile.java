@@ -132,7 +132,7 @@ public class HeapFile implements DbFile {
                 }
                 //if IT is null
                 else{
-                    throw new TransactionAbortedException();
+                    throw new NoSuchElementException();
                 }
 
             }
@@ -159,8 +159,7 @@ public class HeapFile implements DbFile {
             public boolean hasNext() throws DbException, TransactionAbortedException {
                 if (IT == null){
                     //iterator hasn't bee=n declared so open
-                    open();
-                    return hasNext();//call function again
+                   return false;
                 }
                 else{//iT declared
                     //check if there is a tuple!
