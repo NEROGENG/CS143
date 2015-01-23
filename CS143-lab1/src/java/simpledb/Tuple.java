@@ -133,7 +133,7 @@ public class Tuple implements Serializable {
                 
             }
             public boolean hasNext(){
-                if (index < this.tup.TD.numFields())
+                if (index + 1 < this.tup.TD.numFields())
                     return true;
                 else
                     return false;

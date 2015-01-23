@@ -285,7 +285,12 @@ public class HeapPage implements Page {
      */
     public int getNumEmptySlots() {
         // some code goes here
-        return 0;
+        int sum = 0;
+        for (int i = 0; i < numSlots; i++) {
+            if (!isSlotUsed(i))
+                sum++;
+        }
+        return sum;
     }
 
     /**
@@ -293,7 +298,11 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         // some code goes here
-        return false;
+        // if (i >= numSlots || i < 0)
+        //     return true;
+        int byteNum = i / 8;
+        int bitNum = i % 8;
+        return (header[byteNum] & (1 << bitNum)) != 0;
     }
 
     /**
@@ -310,7 +319,34 @@ public class HeapPage implements Page {
      */
     public Iterator<Tuple> iterator() {
         // some code goes here
-        return null;
+        class Tuplerator implements Iterator<Tuple>{
+            public Tuplerator(HeapPage HP){
+                this.HP = HP;
+                this.Index = 0;
+
+            }
+            public void remove(){
+                //satisfy compiler
+            }
+            public Tuple next(){
+                if (hasNext())
+                    return HP.tuples[Index++];
+                    //return tuple object
+                else
+                    return null;
+            }
+            public boolean hasNext(){
+                if (this.Index + 1 < this.HP.getNumTuples())
+                    return true;
+                else
+                    return false;
+
+            }
+            private int Index;
+            private HeapPage HP;
+        }
+        Tuplerator temp = new Tuplerator(this);
+        return temp;
     }
 
 }
