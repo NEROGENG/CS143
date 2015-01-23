@@ -1,7 +1,11 @@
 package simpledb;
 
 import java.io.*;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,6 +24,12 @@ public class BufferPool {
     public static final int PAGE_SIZE = 4096;
 
     private static int pageSize = PAGE_SIZE;
+
+    private static int numPages;
+
+    private int numInUse;
+
+    public HashMap<PageId, Page> intPage;
     
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
@@ -33,6 +43,9 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         // some code goes here
+        BufferPool.numPages = numPages;
+        numInUse = 0;
+        intPage = new HashMap<PageId, Page>();
     }
     
     public static int getPageSize() {
@@ -62,7 +75,20 @@ public class BufferPool {
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         // some code goes here
-        return null;
+        if (perm.toString().equals("UNKNOWN"))  // ignore permissions for now
+            return null;
+
+        if (intPage.get(pid) == null) {
+            if (numInUse == numPages)
+                throw new DbException("No eviction policy");
+            else {
+                intPage.put(pid, Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid));
+                numInUse++;
+                return intPage.get(pid);
+            }
+        }
+        else
+            return intPage.get(pid);
     }
 
     /**

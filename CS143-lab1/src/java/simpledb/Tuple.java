@@ -105,9 +105,11 @@ public class Tuple implements Serializable {
         //have to sepearate contents into columns with \t
         for (int i = 0 ; i < TD.numFields(); i++){
             //add field and then '\t'
-            toReturn += FA[i].toString() +"\t";
+            if (i == TD.numFields() - 1)
+                toReturn += FA[i].toString() + "\n";
+            else
+                toReturn += FA[i].toString() + "\t";
         }
-        toReturn += "\n";
         return toReturn;
     }
     
@@ -128,7 +130,7 @@ public class Tuple implements Serializable {
                 return this.tup.FA[index++];
             }
             public void remove(){
-
+                
             }
             public boolean hasNext(){
                 if (index < this.tup.TD.numFields())
