@@ -165,7 +165,6 @@ public class HeapFile implements DbFile {
                 HP = ((HeapPage)(Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY)));
                 //System.out.println(Arrays.toString(HP.getPageData()));
                 IT = HP.iterator();
-                System.out.println(IT == null);
             }
 
             @Override
