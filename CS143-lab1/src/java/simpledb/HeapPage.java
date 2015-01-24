@@ -80,7 +80,7 @@ public class HeapPage implements Page {
     private int getHeaderSize() {        
         
         // some code goes here
-        return (int)Math.ceil(getNumTuples() / 8);
+        return (int)Math.ceil(((double)getNumTuples()) / 8);
                  
     }
     
@@ -300,8 +300,14 @@ public class HeapPage implements Page {
         // some code goes here
         // if (i >= numSlots || i < 0)
         //     return true;
-        int byteNum = i / 8;
+        int byteNum = (int)Math.floor(i / 8);
         int bitNum = i % 8;
+        if (byteNum >= getHeaderSize()) {
+            System.out.println("Index is " + i);
+            System.out.println("BytNum is " + byteNum);
+            System.out.println("Header size is " + getHeaderSize());
+            System.out.println("Number of Tuples is " + getNumTuples());
+        }
         return (header[byteNum] & (1 << bitNum)) != 0;
         // the slot is in use if the corresponding bit is 1
         // which makes the result after masking none zero

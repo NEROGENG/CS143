@@ -83,8 +83,8 @@ public class HeapFile implements DbFile {
             // we want data[pageNumber*pageSize] to data[pageNumber*pageSize + pageSize]
             // byte [] temp;
             // temp = Arrays.copyOfRange(data, pid.pageNumber()*pageSize, (pid.pageNumber()*pageSize+pageSize));
-
-            if (result == -1)
+            RAF.close();
+            if (result != pageSize)
                 return null;
             else
                 return new HeapPage((HeapPageId)pid, data);
