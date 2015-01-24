@@ -347,6 +347,10 @@ public class HeapPage implements Page {
                 }
                 if (index == this.HP.getNumTuples() || !HP.isSlotUsed(index)){
                     //we reached the end and there is nothing left
+                    // if (index == this.HP.getNumTuples())
+                    //     System.out.println("end reached " + this.HP.getNumTuples());
+                    // else
+                    //     System.out.println("slot is not used");
                     return false;
                     //index is currently at last spot, and it is taken, its stopped somewhere
 

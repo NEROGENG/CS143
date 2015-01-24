@@ -83,6 +83,8 @@ public class BufferPool {
             else {  // load a page from disk through Dbfile's readPage method
                 DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
                 target = databaseFile.readPage(pid);
+
+               // System.out.println("target is null " + (target == null));
                 intPage.put(pidHashCode, target);
                 numInUse++;  // increment the number of pages in the buffer pool
                 return target;

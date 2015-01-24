@@ -71,16 +71,26 @@ public class HeapFile implements DbFile {
     public Page readPage(PageId pid) {
         // some code goes here
         try {
+            ///System.out.println("File size is "+BF.length()/8);
             RandomAccessFile RAF = new RandomAccessFile(BF, "r");
-            int offset = pid.pageNumber() * pageSize;   // calculate the offset in the file
+            RAF.seek((long)pid.pageNumber() * pageSize);   // calculate the offset in the file
+            //System.out.println(offset);
             byte[] data = new byte[pageSize];
-            int result = RAF.read(data, offset, pageSize);  // read from file
-            if (result != pageSize)
+            //offset = 0;
+            int result = RAF.read(data, 0, pageSize);  // read from file
+            // System.out.println(result);
+            // truncate the array if its large
+            // we want data[pageNumber*pageSize] to data[pageNumber*pageSize + pageSize]
+            // byte [] temp;
+            // temp = Arrays.copyOfRange(data, pid.pageNumber()*pageSize, (pid.pageNumber()*pageSize+pageSize));
+
+            if (result == -1)
                 return null;
             else
                 return new HeapPage((HeapPageId)pid, data);
         }
-        catch (Exception e) {
+        catch (IOException e) {
+            System.out.println("Read errors");
             return null;
         }
     }
@@ -123,12 +133,19 @@ public class HeapFile implements DbFile {
             private HeapFile HF;
             private TransactionId TID;
             private Iterator<Tuple> IT;
-
+            private HeapPageId [] hpidarray;
+            private int heapindex;
             public DBterator(HeapFile hf, TransactionId tid){
                 TID = tid;
                 HF = hf;
                 index = 0;
+                heapindex = 0;
                 IT = null;
+                hpidarray = new HeapPageId [HF.numPages()];
+                for (int i = 0; i < HF.numPages(); i++){
+                    hpidarray[i] = new HeapPageId(HF.getId(), i);
+                               
+                }
             }
             @Override
             //returns next tuple, needs tuple iterator
@@ -139,10 +156,20 @@ public class HeapFile implements DbFile {
                 }
                 else{//iT declared
                     //check if there is a tuple!
+
                     if (IT.hasNext())
                         return true;
-                    else
-                        return false;
+                    else{
+                        //move onto next oage if needed
+                        if (heapindex < HF.numPages())
+                        {
+                            heapindex++;
+                            open();
+                            return hasNext();
+                        }
+                        else
+                            return false;
+                    }
                 }
 
 
@@ -157,14 +184,22 @@ public class HeapFile implements DbFile {
             //starts the iterator.
             public void open() throws DbException, TransactionAbortedException {
                 //open creates the iterator
-                HeapPage HP;// use getPage(TransactionId tid, PageId pid, Permissions perm)
-                //page id = from heap file
-                //page no?
-                //get bufferpool from database class
-                HeapPageId ID = new HeapPageId(HF.getId(),index);
-                HP = ((HeapPage)(Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY)));
-                //System.out.println(Arrays.toString(HP.getPageData()));
-                IT = HP.iterator();
+                if (!(heapindex == HF.numPages())){ 
+                HeapPageId ID = hpidarray[heapindex];
+                //ID = new HeapPageId(HF.getId(), heapindex);
+                //System.out.println( heapindex + " + " + ID.pageNumber());
+
+                Page temp = (Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY));
+                //System.out.println(Database.getBufferPool().intPage.keySet().toString());
+                //System.out.println(ID.hashCode());
+
+
+                //IT is now the new iterator
+                //System.out.println(temp==null);
+                IT = ((HeapPage)temp).iterator();
+
+                //System.out.println(IT==null);
+                }
             }
 
             @Override

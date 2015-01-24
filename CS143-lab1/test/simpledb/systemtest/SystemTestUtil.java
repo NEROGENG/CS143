@@ -2,6 +2,7 @@ package simpledb.systemtest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -111,24 +112,32 @@ public class SystemTestUtil {
             throws DbException, TransactionAbortedException, IOException {
         ArrayList<ArrayList<Integer>> copy = new ArrayList<ArrayList<Integer>>(tuples);
 
+        System.out.println("first line");
         if (Debug.isEnabled()) {
             Debug.log("Expected tuples:");
+            System.out.println("Expected tuples:");
             for (ArrayList<Integer> t : copy) {
                 Debug.log("\t" + Utility.listToString(t));
+                System.out.println("\t" + Utility.listToString(t));
             }
         }
 
         iterator.open();
+        int temp = 0;
         while (iterator.hasNext()) {
             Tuple t = iterator.next();
             ArrayList<Integer> list = tupleToList(t);
             boolean isExpected = copy.remove(list);
             Debug.log("scanned tuple: %s (%s)", t, isExpected ? "expected" : "not expected");
+            //System.out.printf("scanned tuple: %s (%s)", t, isExpected ? "expected" : "not expected");
+            //System.out.println();
+            temp++;
             if (!isExpected) {
                 Assert.fail("expected tuples does not contain: " + t);
             }
         }
         iterator.close();
+        System.out.println(temp);
 
         if (!copy.isEmpty()) {
             String msg = "expected to find the following tuples:\n";
