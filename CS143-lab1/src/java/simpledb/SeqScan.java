@@ -1,5 +1,6 @@
 package simpledb;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 
 /**
@@ -10,7 +11,10 @@ import java.util.*;
 public class SeqScan implements DbIterator {
 
     private static final long serialVersionUID = 1L;
-
+    private TransactionId TID;
+    private int tableID;
+    private String alias;
+    private DbFileIterator Dbterator;
     /**
      * Creates a sequential scan over the specified table as a part of the
      * specified transaction.
@@ -29,6 +33,10 @@ public class SeqScan implements DbIterator {
      */
     public SeqScan(TransactionId tid, int tableid, String tableAlias) {
         // some code goes here
+        this.alias = tableAlias;
+        this.tableID = tableid;
+        this.TID = tid;
+        Dbterator = null;
     }
 
     /**
@@ -37,7 +45,7 @@ public class SeqScan implements DbIterator {
      *       be the actual name of the table in the catalog of the database
      * */
     public String getTableName() {
-        return null;
+        return Database.getCatalog().getTableName(tableID);
     }
     
     /**
@@ -46,7 +54,7 @@ public class SeqScan implements DbIterator {
     public String getAlias()
     {
         // some code goes here
-        return null;
+        return alias;
     }
 
     /**
@@ -63,6 +71,9 @@ public class SeqScan implements DbIterator {
      */
     public void reset(int tableid, String tableAlias) {
         // some code goes here
+        this.tableID = tableid;
+        this.alias = tableAlias;
+        this.Dbterator = null;
     }
 
     public SeqScan(TransactionId tid, int tableid) {
@@ -70,6 +81,9 @@ public class SeqScan implements DbIterator {
     }
 
     public void open() throws DbException, TransactionAbortedException {
+        //open a heap file
+        this.Dbterator = ((HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID))).iterator(this.TID);
+        this.Dbterator.open();
         // some code goes here
     }
 
@@ -83,27 +97,44 @@ public class SeqScan implements DbIterator {
      *         prefixed with the tableAlias string from the constructor.
      */
     public TupleDesc getTupleDesc() {
+        // tuple Desc needs array of types and strings
+        // use alias to get these types
+        TupleDesc temp = ((HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID))).getTupleDesc();
+        String [] buildstr = new String[temp.numFields()];
+        Type [] buildtyp = new Type [temp.numFields()];
+
+        //fill arrays
+        for (int i = 0; i < temp.numFields(); i++) {
+            buildtyp[i] = temp.getFieldType(i);     //copy type
+            //field names are "prefixed with table alias string
+            buildstr[i] = this.alias + temp.getFieldName(i);
+        }
         // some code goes here
-        return null;
+
+        //return new tuple
+        return new TupleDesc(buildtyp,buildstr);
     }
 
     public boolean hasNext() throws TransactionAbortedException, DbException {
         // some code goes here
-        return false;
+        return this.Dbterator.hasNext();
     }
 
     public Tuple next() throws NoSuchElementException,
             TransactionAbortedException, DbException {
         // some code goes here
-        return null;
+        return this.Dbterator.next();
     }
 
     public void close() {
         // some code goes here
+        this.Dbterator.close();
     }
 
     public void rewind() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
+        this.Dbterator.rewind();
+
     }
 }

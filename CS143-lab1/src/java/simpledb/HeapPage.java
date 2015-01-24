@@ -289,7 +289,7 @@ public class HeapPage implements Page {
         for (int i = 0; i < numSlots; i++) {
             if (!isSlotUsed(i))
                 sum++;
-        }
+        }   // go through each of the slot to see if it is available
         return sum;
     }
 
@@ -303,6 +303,8 @@ public class HeapPage implements Page {
         int byteNum = i / 8;
         int bitNum = i % 8;
         return (header[byteNum] & (1 << bitNum)) != 0;
+        // the slot is in use if the corresponding bit is 1
+        // which makes the result after masking none zero
     }
 
     /**

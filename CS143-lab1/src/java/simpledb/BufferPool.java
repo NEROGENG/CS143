@@ -26,7 +26,8 @@ public class BufferPool {
 
     private int numInUse;
 
-    public HashMap<Integer, Page> intPage;
+    public HashMap<Integer, Page> intPage;  
+    // The buffer pool is implemented through aapping between PageId's hash and Page
     
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
@@ -77,13 +78,13 @@ public class BufferPool {
         int pidHashCode = pid.hashCode();
         Page target = intPage.get(pidHashCode);
         if (target == null) {
-            if (numInUse == NP)
+            if (numInUse == NP)  // if the buffer pool is full
                 throw new DbException("No eviction policy");
-            else {
+            else {  // load a page from disk through Dbfile's readPage method
                 DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
                 target = databaseFile.readPage(pid);
                 intPage.put(pidHashCode, target);
-                numInUse++;
+                numInUse++;  // increment the number of pages in the buffer pool
                 return target;
             }
         }

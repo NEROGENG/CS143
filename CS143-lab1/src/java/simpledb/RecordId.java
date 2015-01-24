@@ -80,9 +80,9 @@ public class RecordId implements Serializable {
     public int hashCode() {
         // some code goes here
         // throw new UnsupportedOperationException("implement this");
-        int m1 = 0xf0f0f0f0;
-        int m2 = 0x0f0f0f0f;
-        return PID.hashCode() & m1 | TN & m2;
+        int m1 = 0xf0f0f0f0;    // use half of the digits of table number
+        int m2 = 0x0f0f0f0f;    // use half of the digits of page ID
+        return PID.hashCode() & m1 | TN & m2;   // to create a hashcode
     }
 
 }

@@ -72,9 +72,9 @@ public class HeapFile implements DbFile {
         // some code goes here
         try {
             RandomAccessFile RAF = new RandomAccessFile(BF, "r");
-            int offset = pid.pageNumber() * pageSize;
+            int offset = pid.pageNumber() * pageSize;   // calculate the offset in the file
             byte[] data = new byte[pageSize];
-            int result = RAF.read(data, offset, pageSize);
+            int result = RAF.read(data, offset, pageSize);  // read from file
             if (result != pageSize)
                 return null;
             else
