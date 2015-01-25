@@ -39,71 +39,71 @@ public class ScanTest extends SimpleDbTestBase {
     @Test public void testSmall() throws IOException, DbException, TransactionAbortedException {
         int[] columnSizes = new int[]{1, 2, 3, 4};
         int[] rowSizes =
-                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 8192/*4096 + r.nextInt(4096)*/};
+                new int[]{0, 1, 2, 511, 512, 513, 1023, 1024, 1025, 4096 + r.nextInt(4096)};
                 // new int[]{8192};
         validateScan(columnSizes, rowSizes);
     }
 
     /** Test that rewinding a SeqScan iterator works. */
-    // @Test public void testRewind() throws IOException, DbException, TransactionAbortedException {
-    //     ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
-    //     HeapFile f = SystemTestUtil.createRandomHeapFile(2, 1000, null, tuples);
+    @Test public void testRewind() throws IOException, DbException, TransactionAbortedException {
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+        HeapFile f = SystemTestUtil.createRandomHeapFile(2, 1000, null, tuples);
 
-    //     TransactionId tid = new TransactionId();
-    //     SeqScan scan = new SeqScan(tid, f.getId(), "table");
-    //     scan.open();
-    //     for (int i = 0; i < 100; ++i) {
-    //         assertTrue(scan.hasNext());
-    //         Tuple t = scan.next();
-    //         assertEquals(tuples.get(i), SystemTestUtil.tupleToList(t));
-    //     }
+        TransactionId tid = new TransactionId();
+        SeqScan scan = new SeqScan(tid, f.getId(), "table");
+        scan.open();
+        for (int i = 0; i < 100; ++i) {
+            assertTrue(scan.hasNext());
+            Tuple t = scan.next();
+            assertEquals(tuples.get(i), SystemTestUtil.tupleToList(t));
+        }
 
-    //     scan.rewind();
-    //     for (int i = 0; i < 100; ++i) {
-    //         assertTrue(scan.hasNext());
-    //         Tuple t = scan.next();
-    //         assertEquals(tuples.get(i), SystemTestUtil.tupleToList(t));
-    //     }
-    //     scan.close();
-    //     Database.getBufferPool().transactionComplete(tid);
-    // }
+        scan.rewind();
+        for (int i = 0; i < 100; ++i) {
+            assertTrue(scan.hasNext());
+            Tuple t = scan.next();
+            assertEquals(tuples.get(i), SystemTestUtil.tupleToList(t));
+        }
+        scan.close();
+        Database.getBufferPool().transactionComplete(tid);
+    }
 
     /** Verifies that the buffer pool is actually caching data.
      * @throws TransactionAbortedException
      * @throws DbException */
-    // @Test public void testCache() throws IOException, DbException, TransactionAbortedException {
-    //     /** Counts the number of readPage operations. */
-    //     class InstrumentedHeapFile extends HeapFile {
-    //         public InstrumentedHeapFile(File f, TupleDesc td) {
-    //             super(f, td);
-    //         }
+    @Test public void testCache() throws IOException, DbException, TransactionAbortedException {
+        /** Counts the number of readPage operations. */
+        class InstrumentedHeapFile extends HeapFile {
+            public InstrumentedHeapFile(File f, TupleDesc td) {
+                super(f, td);
+            }
 
-    //         @Override
-    //         public Page readPage(PageId pid) throws NoSuchElementException {
-    //             readCount += 1;
-    //             return super.readPage(pid);
-    //         }
+            @Override
+            public Page readPage(PageId pid) throws NoSuchElementException {
+                readCount += 1;
+                return super.readPage(pid);
+            }
 
-    //         public int readCount = 0;
-    //     }
+            public int readCount = 0;
+        }
 
-    //     // Create the table
-    //     final int PAGES = 30;
-    //     ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
-    //     File f = SystemTestUtil.createRandomHeapFileUnopened(1, 992*PAGES, 1000, null, tuples);
-    //     TupleDesc td = Utility.getTupleDesc(1);
-    //     InstrumentedHeapFile table = new InstrumentedHeapFile(f, td);
-    //     Database.getCatalog().addTable(table, SystemTestUtil.getUUID());
+        // Create the table
+        final int PAGES = 30;
+        ArrayList<ArrayList<Integer>> tuples = new ArrayList<ArrayList<Integer>>();
+        File f = SystemTestUtil.createRandomHeapFileUnopened(1, 992*PAGES, 1000, null, tuples);
+        TupleDesc td = Utility.getTupleDesc(1);
+        InstrumentedHeapFile table = new InstrumentedHeapFile(f, td);
+        Database.getCatalog().addTable(table, SystemTestUtil.getUUID());
 
-    //     // Scan the table once
-    //     SystemTestUtil.matchTuples(table, tuples);
-    //     assertEquals(PAGES, table.readCount);
-    //     table.readCount = 0;
+        // Scan the table once
+        SystemTestUtil.matchTuples(table, tuples);
+        assertEquals(PAGES, table.readCount);
+        table.readCount = 0;
 
-    //     // Scan the table again: all pages should be cached
-    //     SystemTestUtil.matchTuples(table, tuples);
-    //     assertEquals(0, table.readCount);
-    // }
+        // Scan the table again: all pages should be cached
+        SystemTestUtil.matchTuples(table, tuples);
+        assertEquals(0, table.readCount);
+    }
 
     /** Make test compatible with older version of ant. */
     public static junit.framework.Test suite() {

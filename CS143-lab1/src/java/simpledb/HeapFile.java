@@ -71,18 +71,12 @@ public class HeapFile implements DbFile {
     public Page readPage(PageId pid) {
         // some code goes here
         try {
-            ///System.out.println("File size is "+BF.length()/8);
             RandomAccessFile RAF = new RandomAccessFile(BF, "r");
-            RAF.seek((long)pid.pageNumber() * pageSize);   // calculate the offset in the file
-            //System.out.println(offset);
+            long offset = (long)pid.pageNumber() * pageSize;    // calculate the offset in the file
+            RAF.seek(offset);   // move the read head
             byte[] data = new byte[pageSize];
-            //offset = 0;
             int result = RAF.read(data, 0, pageSize);  // read from file
-            // System.out.println(result);
-            // truncate the array if its large
-            // we want data[pageNumber*pageSize] to data[pageNumber*pageSize + pageSize]
-            // byte [] temp;
-            // temp = Arrays.copyOfRange(data, pid.pageNumber()*pageSize, (pid.pageNumber()*pageSize+pageSize));
+            
             RAF.close();
             if (result != pageSize)
                 return null;

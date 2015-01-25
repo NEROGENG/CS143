@@ -78,11 +78,10 @@ public class RecordId implements Serializable {
      */
     @Override
     public int hashCode() {
-        // some code goes here
-        // throw new UnsupportedOperationException("implement this");
-        int m1 = 0xf0f0f0f0;    // use half of the digits of table number
-        int m2 = 0x0f0f0f0f;    // use half of the digits of page ID
-        return PID.hashCode() & m1 | TN & m2;   // to create a hashcode
+        int mask = 0x0000ffff;
+        int hash = (PID.pageNumber() & mask) << 16;  // put page number on the higher 16 bits
+        hash |= (TN & mask);    // put tuple number on the lower 16 bits
+        return hash;
     }
 
 }
