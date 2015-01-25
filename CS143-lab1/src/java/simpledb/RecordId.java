@@ -10,7 +10,7 @@ public class RecordId implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private PageId PID;
-    private int Tuplenum;
+    private int TN;
     /**
      * Creates a new RecordId referring to the specified PageId and tuple
      * number.
@@ -23,7 +23,7 @@ public class RecordId implements Serializable {
     public RecordId(PageId pid, int tupleno) {
         // some code goes here
         PID = pid;
-        Tuplenum = tupleno;
+        TN = tupleno;
     }
 
     /**
@@ -31,7 +31,7 @@ public class RecordId implements Serializable {
      */
     public int tupleno() {
         // some code goes here
-        return Tuplenum;
+        return TN;
     }
 
     /**
@@ -50,22 +50,24 @@ public class RecordId implements Serializable {
      */
     @Override
     public boolean equals(Object o) {
-        //to represent the same tuple, it has to have the same page id and tuple no
-        //cast object as record id
+        // some code goes here
+        // throw new UnsupportedOperationException("implement this");
+        if (o == null) {
+            if (this == null)
+                return true;
+            else
+                return false;
+        }
+
         try {
-            if (((RecordId) o).getPageId() == this.getPageId()){
-                if (((RecordId)o).tupleno() == this.tupleno())
-                    return true;
-
-
-            }
-            //if neither if statement works, return false;
-            return false;
-        }catch (Exception e){
-            //if it isn't a record number
+            if (this.PID.equals(((RecordId)o).getPageId()) 
+                && this.TN == ((RecordId)o).tupleno())
+                return true;
+        }
+        catch (Exception e) {
             return false;
         }
-        //throw new UnsupportedOperationException("implement this");
+        return false;
     }
 
     /**
@@ -77,12 +79,10 @@ public class RecordId implements Serializable {
     @Override
     public int hashCode() {
         // some code goes here
-        //throw new UnsupportedOperationException("implement this");
-
-        //has to be unique, unique being spot in pageID and tuple no
-        //represent the page as number
-        return (this.tupleno() + this.getPageId().getTableId());
-
+        // throw new UnsupportedOperationException("implement this");
+        int m1 = 0xf0f0f0f0;    // use half of the digits of table number
+        int m2 = 0x0f0f0f0f;    // use half of the digits of page ID
+        return PID.hashCode() & m1 | TN & m2;   // to create a hashcode
     }
 
 }

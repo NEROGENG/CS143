@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * The BufferPool is also responsible for locking;  when a transaction fetches
  * a page, BufferPool checks that the transaction has the appropriate
  * locks to read/write the page.
- *
+ * 
  * @Threadsafe, all fields are final
  */
 public class BufferPool {
@@ -26,11 +26,12 @@ public class BufferPool {
 
     private int numInUse;
 
-    public HashMap<Integer, Page> intPage;
-
+    public HashMap<Integer, Page> intPage;  
+    // The buffer pool is implemented through aapping between PageId's hash and Page
+    
     /** Default number of pages passed to the constructor. This is used by
-     other classes. BufferPool should use the numPages argument to the
-     constructor instead. */
+    other classes. BufferPool should use the numPages argument to the
+    constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
     /**
@@ -44,14 +45,14 @@ public class BufferPool {
         numInUse = 0;
         intPage = new HashMap<Integer, Page>();
     }
-
+    
     public static int getPageSize() {
-        return pageSize;
+      return pageSize;
     }
-
+    
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
     public static void setPageSize(int pageSize) {
-        BufferPool.pageSize = pageSize;
+    	BufferPool.pageSize = pageSize;
     }
 
     /**
@@ -70,23 +71,27 @@ public class BufferPool {
      * @param perm the requested permissions on the page
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
-            throws TransactionAbortedException, DbException {
+        throws TransactionAbortedException, DbException {
         // some code goes here
-        if (perm.toString().equals("UNKNOWN"))  // ignore permissions for now
-            return null;
-
-        if (intPage.get(pid.hashCode()) == null) {
-            if (numInUse == NP)
+        // if (perm.toString().equals("UNKNOWN"))  // ignore permissions for now
+        //     return null;
+        int pidHashCode = pid.hashCode();
+        Page target = intPage.get(pidHashCode);
+        if (target == null) {
+            if (numInUse == NP)  // if the buffer pool is full
                 throw new DbException("No eviction policy");
-            else {
-                intPage.put(pid.hashCode(), Database.getCatalog()
-                        .getDatabaseFile(pid.getTableId()).readPage(pid));
-                numInUse++;
-                return intPage.get(pid.hashCode());
+            else {  // load a page from disk through Dbfile's readPage method
+                DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
+                target = databaseFile.readPage(pid);
+
+               // System.out.println("target is null " + (target == null));
+                intPage.put(pidHashCode, target);
+                numInUse++;  // increment the number of pages in the buffer pool
+                return target;
             }
         }
         else
-            return intPage.get(pid.hashCode());
+            return target;
     }
 
     /**
@@ -128,7 +133,7 @@ public class BufferPool {
      * @param commit a flag indicating whether we should commit or abort
      */
     public void transactionComplete(TransactionId tid, boolean commit)
-            throws IOException {
+        throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
     }
@@ -138,7 +143,7 @@ public class BufferPool {
      * acquire a write lock on the page the tuple is added to and any other 
      * pages that are updated (Lock acquisition is not needed for lab2). 
      * May block if the lock(s) cannot be acquired.
-     *
+     * 
      * Marks any pages that were dirtied by the operation as dirty by calling
      * their markDirty bit, and updates cached versions of any pages that have 
      * been dirtied so that future requests see up-to-date pages. 
@@ -148,7 +153,7 @@ public class BufferPool {
      * @param t the tuple to add
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
-            throws DbException, IOException, TransactionAbortedException {
+        throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
     }
@@ -166,7 +171,7 @@ public class BufferPool {
      * @param t the tuple to delete
      */
     public  void deleteTuple(TransactionId tid, Tuple t)
-            throws DbException, IOException, TransactionAbortedException {
+        throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
     }
@@ -183,10 +188,10 @@ public class BufferPool {
     }
 
     /** Remove the specific page id from the buffer pool.
-     Needed by the recovery manager to ensure that the
-     buffer pool doesn't keep a rolled back page in its
-     cache.
-     */
+        Needed by the recovery manager to ensure that the
+        buffer pool doesn't keep a rolled back page in its
+        cache.
+    */
     public synchronized void discardPage(PageId pid) {
         // some code goes here
         // only necessary for lab5

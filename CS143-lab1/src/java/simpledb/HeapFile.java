@@ -14,7 +14,9 @@ import java.util.*;
  * @author Sam Madden
  */
 public class HeapFile implements DbFile {
-
+    private File BF;
+    private TupleDesc TD;
+    private int pageSize;
     /**
      * Constructs a heap file backed by the specified file.
      * 
@@ -24,6 +26,9 @@ public class HeapFile implements DbFile {
      */
     public HeapFile(File f, TupleDesc td) {
         // some code goes here
+        BF = f;
+        TD = td;
+        pageSize = BufferPool.getPageSize();
     }
 
     /**
@@ -33,7 +38,7 @@ public class HeapFile implements DbFile {
      */
     public File getFile() {
         // some code goes here
-        return null;
+        return BF;
     }
 
     /**
@@ -47,7 +52,8 @@ public class HeapFile implements DbFile {
      */
     public int getId() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        // throw new UnsupportedOperationException("implement this");
+        return BF.getAbsoluteFile().hashCode();
     }
 
     /**
@@ -57,13 +63,36 @@ public class HeapFile implements DbFile {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        // throw new UnsupportedOperationException("implement this");
+        return TD;
     }
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
         // some code goes here
-        return null;
+        try {
+            ///System.out.println("File size is "+BF.length()/8);
+            RandomAccessFile RAF = new RandomAccessFile(BF, "r");
+            RAF.seek((long)pid.pageNumber() * pageSize);   // calculate the offset in the file
+            //System.out.println(offset);
+            byte[] data = new byte[pageSize];
+            //offset = 0;
+            int result = RAF.read(data, 0, pageSize);  // read from file
+            // System.out.println(result);
+            // truncate the array if its large
+            // we want data[pageNumber*pageSize] to data[pageNumber*pageSize + pageSize]
+            // byte [] temp;
+            // temp = Arrays.copyOfRange(data, pid.pageNumber()*pageSize, (pid.pageNumber()*pageSize+pageSize));
+            RAF.close();
+            if (result != pageSize)
+                return null;
+            else
+                return new HeapPage((HeapPageId)pid, data);
+        }
+        catch (IOException e) {
+            System.out.println("Read errors");
+            return null;
+        }
     }
 
     // see DbFile.java for javadocs
@@ -77,7 +106,7 @@ public class HeapFile implements DbFile {
      */
     public int numPages() {
         // some code goes here
-        return 0;
+        return ((int)BF.length()) / pageSize;
     }
 
     // see DbFile.java for javadocs
@@ -97,13 +126,6 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
-    /**
-     * Returns an iterator over all the tuples stored in this DbFile. The
-     * iterator must use {@link BufferPool#getPage}, rather than
-     * {@link #readPage} to iterate through the pages.
-     *
-     * @return an iterator over all the tuples stored in this DbFile.
-     */
     public DbFileIterator iterator(TransactionId tid) {
         // some code goes here
         class DBterator implements DbFileIterator{
@@ -111,15 +133,76 @@ public class HeapFile implements DbFile {
             private HeapFile HF;
             private TransactionId TID;
             private Iterator<Tuple> IT;
-
+            private HeapPageId [] hpidarray;
+            private int heapindex;
             public DBterator(HeapFile hf, TransactionId tid){
                 TID = tid;
                 HF = hf;
                 index = 0;
+                heapindex = 0;
                 IT = null;
+                hpidarray = new HeapPageId [HF.numPages()];
+                for (int i = 0; i < HF.numPages(); i++){
+                    hpidarray[i] = new HeapPageId(HF.getId(), i);
+                               
+                }
             }
             @Override
             //returns next tuple, needs tuple iterator
+            public boolean hasNext() throws DbException, TransactionAbortedException {
+                if (IT == null){
+                    //iterator hasn't bee=n declared so open
+                   return false;
+                }
+                else{//iT declared
+                    //check if there is a tuple!
+
+                    if (IT.hasNext())
+                        return true;
+                    else{
+                        //move onto next oage if needed
+                        if (heapindex < HF.numPages())
+                        {
+                            heapindex++;
+                            open();
+                            return hasNext();
+                        }
+                        else
+                            return false;
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void close() {
+                IT = null;
+            }
+
+            @Override
+            //starts the iterator.
+            public void open() throws DbException, TransactionAbortedException {
+                //open creates the iterator
+                if (!(heapindex == HF.numPages())){ 
+                HeapPageId ID = hpidarray[heapindex];
+                //ID = new HeapPageId(HF.getId(), heapindex);
+                //System.out.println( heapindex + " + " + ID.pageNumber());
+
+                Page temp = (Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY));
+                //System.out.println(Database.getBufferPool().intPage.keySet().toString());
+                //System.out.println(ID.hashCode());
+
+
+                //IT is now the new iterator
+                //System.out.println(temp==null);
+                IT = ((HeapPage)temp).iterator();
+
+                //System.out.println(IT==null);
+                }
+            }
+
+            @Override
             public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
                 if(IT != null){
                     Tuple toReturn = null;//check for another tuple
@@ -138,40 +221,6 @@ public class HeapFile implements DbFile {
             }
 
             @Override
-            public void close() {
-                IT = null;
-            }
-
-            @Override
-            //starts the iterator.
-            public void open() throws DbException, TransactionAbortedException {
-                //open creates the iterator
-                HeapPage HP;// use getPage(TransactionId tid, PageId pid, Permissions perm)
-                //page id = from heap file
-                //page no?
-                //get bufferpool from database class
-                HeapPageId ID = new HeapPageId(HF.getId(),index);
-                HP = ((HeapPage)(Database.getBufferPool().getPage(TID, ID, Permissions.READ_ONLY)));
-                IT = HP.iterator();
-            }
-
-            @Override
-            public boolean hasNext() throws DbException, TransactionAbortedException {
-                if (IT == null){
-                    //iterator hasn't bee=n declared so open
-                   return false;
-                }
-                else{//iT declared
-                    //check if there is a tuple!
-                    if (IT.hasNext())
-                        return true;
-                    else
-                        return false;
-                }
-
-            }
-
-            @Override
             public void rewind() throws DbException, TransactionAbortedException {
                 //rewinds the iterator back to beginning
                 index = 0;
@@ -181,6 +230,7 @@ public class HeapFile implements DbFile {
         DBterator temp = new DBterator(this, tid);
         return temp;
     }
+
 
 }
 

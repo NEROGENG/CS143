@@ -14,7 +14,7 @@ public class Tuple implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private TupleDesc TD;
-    private Field[] FA;     //array of fields defined by tupleDesc
+    private Field[] FA;
     private RecordId RID;
 
     /**
@@ -105,9 +105,11 @@ public class Tuple implements Serializable {
         //have to sepearate contents into columns with \t
         for (int i = 0 ; i < TD.numFields(); i++){
             //add field and then '\t'
-            toReturn += FA[i].toString() +"\t";
+            if (i == TD.numFields() - 1)
+                toReturn += FA[i].toString() + "\n";
+            else
+                toReturn += FA[i].toString() + "\t";
         }
-        toReturn += "\n";
         return toReturn;
     }
     
@@ -117,33 +119,25 @@ public class Tuple implements Serializable {
      * */
     public Iterator<Field> fields()
     {
-        //iterator of fields
         // some code goes here
         //return null;
-        //create new class
         class toReturn implements Iterator<Field>{
-
             public toReturn(Tuple tup){
                 this.tup = tup;
                 this.index = 0;
             }
-
-            public void remove(){//required
-
+            public Field next(){
+                return this.tup.FA[index++];
             }
-            public boolean hasNext(){//required, check index with the size
-                if (index < this.tup.TD.numFields())//if there is room, if ==, then at capacity
+            public void remove(){
+                
+            }
+            public boolean hasNext(){
+                if (index + 1 < this.tup.TD.numFields())
                     return true;
                 else
                     return false;
             }
-            //goes through all of the fields in the tuple
-            //index keeps track of it
-            public Field next(){
-                return this.tup.FA[index++];
-            }
-
-
             public int index;
             public Tuple tup;
         }

@@ -82,8 +82,7 @@ public class SeqScan implements DbIterator {
 
     public void open() throws DbException, TransactionAbortedException {
         //open a heap file
-        HeapFile temp = ((HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID)));
-        this.Dbterator = temp.iterator(this.TID);
+        this.Dbterator = ((HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID))).iterator(this.TID);
         this.Dbterator.open();
         // some code goes here
     }
@@ -100,8 +99,7 @@ public class SeqScan implements DbIterator {
     public TupleDesc getTupleDesc() {
         // tuple Desc needs array of types and strings
         // use alias to get these types
-        HeapFile temp1 = (HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID));
-        TupleDesc temp = temp1.getTupleDesc();
+        TupleDesc temp = ((HeapFile)(Database.getCatalog().getDatabaseFile(this.tableID))).getTupleDesc();
         String [] buildstr = new String[temp.numFields()];
         Type [] buildtyp = new Type [temp.numFields()];
 
