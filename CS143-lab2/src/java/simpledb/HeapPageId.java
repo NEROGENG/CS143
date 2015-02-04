@@ -39,11 +39,10 @@ public class HeapPageId implements PageId {
      * @see BufferPool
      */
     public int hashCode() {
-        // some code goes here
-        // throw new UnsupportedOperationException("implement this");
-        int m1 = 0xf0f0f0f0;    // use half of the digits of transaction ID
-        int m2 = 0x0f0f0f0f;    // use half of the digits of page number
-        return TID & m1 | PN & m2;  // to create a hashcode
+        int mask = 0x0000ffff;
+        int hash = (TID & mask) << 16;  // put table id on the higher 16 bits
+        hash |= (PN & mask);    // put page number on the lower 16 bits
+        return hash;
     }
 
     /**
