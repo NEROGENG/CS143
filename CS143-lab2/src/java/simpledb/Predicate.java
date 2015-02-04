@@ -8,6 +8,8 @@ import java.io.Serializable;
 public class Predicate implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private int FN;
+    private Field FO;
 
     /** Constants used for return codes in Field.compare */
     public enum Op implements Serializable {
@@ -43,6 +45,8 @@ public class Predicate implements Serializable {
         }
 
     }
+
+    private Op OP;
     
     /**
      * Constructor.
@@ -56,6 +60,9 @@ public class Predicate implements Serializable {
      */
     public Predicate(int field, Op op, Field operand) {
         // some code goes here
+        FN = field;
+        OP = op;
+        FO = operand;
     }
 
     /**
@@ -64,7 +71,7 @@ public class Predicate implements Serializable {
     public int getField()
     {
         // some code goes here
-        return -1;
+        return FN;
     }
 
     /**
@@ -73,7 +80,7 @@ public class Predicate implements Serializable {
     public Op getOp()
     {
         // some code goes here
-        return null;
+        return OP;
     }
     
     /**
@@ -82,7 +89,7 @@ public class Predicate implements Serializable {
     public Field getOperand()
     {
         // some code goes here
-        return null;
+        return FO;
     }
     
     /**
@@ -97,7 +104,7 @@ public class Predicate implements Serializable {
      */
     public boolean filter(Tuple t) {
         // some code goes here
-        return false;
+        return t.getField(FN).compare(OP, FO);
     }
 
     /**
@@ -106,6 +113,6 @@ public class Predicate implements Serializable {
      */
     public String toString() {
         // some code goes here
-        return "";
+        return "f = " + FN + " op = " + OP.toString() + " operand = " + FO.toString();
     }
 }
