@@ -74,10 +74,12 @@ public class Join extends Operator {
         // some code goes here
         CH1.open();
         CH2.open();
+        // int count = 0;
         while (CH1.hasNext()) {
             Tuple t1 = CH1.next();
             while (CH2.hasNext()) {
                 Tuple t2 = CH2.next();
+                // count++;
                 if (JP.filter(t1, t2)) {
                     Tuple t3 = new Tuple(this.getTupleDesc());
                     int i = 0;
@@ -85,11 +87,14 @@ public class Join extends Operator {
                         t3.setField(i, t1.getField(i));
                     for (; i < t3.getTupleDesc().numFields(); i++)
                         t3.setField(i, t2.getField(i - t1.getTupleDesc().numFields()));
+                    // System.out.println(t3.toString());
                     TARRAY.add(t3);
                 }
             }
             CH2.rewind();
         }
+
+        // System.out.println("countjoin is "+count);
         IT = TARRAY.iterator();
         super.open();
     }
@@ -144,6 +149,11 @@ public class Join extends Operator {
         CHILDREN = children;
         CH1 = CHILDREN[0];
         CH2 = CHILDREN[1];
+    }
+
+    public void print() {
+        for (int i = 0; i < TARRAY.size(); i++)
+            System.out.println(TARRAY.get(i).toString());
     }
 
 }

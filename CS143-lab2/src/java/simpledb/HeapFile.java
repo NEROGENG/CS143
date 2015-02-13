@@ -200,8 +200,9 @@ public class HeapFile implements DbFile {
                             open();
                             return hasNext();
                         }
-                        else
+                        else {
                             return false;
+                        }
                     }
                 }
 
@@ -257,7 +258,10 @@ public class HeapFile implements DbFile {
             public void rewind() throws DbException, TransactionAbortedException {
                 //rewinds the iterator back to beginning
                 index = 0;
+                heapindex = 0;
+                // System.out.println("rewind!");
                 open();
+                // System.out.println("hasNext is " + hasNext());
             }
         }
         DBterator temp = new DBterator(this, tid);
