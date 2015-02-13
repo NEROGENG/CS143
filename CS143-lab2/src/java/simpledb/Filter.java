@@ -10,6 +10,7 @@ public class Filter extends Operator {
     private static final long serialVersionUID = 1L;
     private Predicate PRE;
     private DbIterator CHILD;
+    private DbIterator[] CHILDREN;
 
     /**
      * Constructor accepts a predicate to apply and a child operator to read
@@ -24,6 +25,7 @@ public class Filter extends Operator {
         // some code goes here
         PRE = p;
         CHILD = child;
+        CHILDREN = new DbIterator[] {CHILD};
     }
 
     public Predicate getPredicate() {
@@ -77,12 +79,14 @@ public class Filter extends Operator {
     @Override
     public DbIterator[] getChildren() {
         // some code goes here
-        return null;
+        return CHILDREN;
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
         // some code goes here
+        CHILDREN = children;
+        CHILD = CHILDREN[0];
     }
 
 }
