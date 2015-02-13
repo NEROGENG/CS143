@@ -159,9 +159,8 @@ public class BufferPool {
         for (int i = 0; i < pageList.size(); i++) {
             Page temp = pageList.get(i);
             int pidHashCode = temp.getId().hashCode();
+            // System.out.println(pidHashCode);
             temp.markDirty(true, tid);
-            if (intPage.remove(pidHashCode) == null)
-                throw new DbException("modified page not in BufferPool");
             intPage.put(pidHashCode, temp);
         }
     }
@@ -189,8 +188,6 @@ public class BufferPool {
             Page temp = pageList.get(i);
             int pidHashCode = temp.getId().hashCode();
             temp.markDirty(true, tid);
-            if (intPage.remove(pidHashCode) == null)
-                throw new DbException("modified page not in BufferPool");
             intPage.put(pidHashCode, temp);
         }
     }
