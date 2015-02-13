@@ -26,6 +26,8 @@ public class BufferPool {
 
     private int numInUse;
 
+    private PageId MRU;
+
     public HashMap<Integer, Page> intPage;  
     // The buffer pool is implemented through aapping between PageId's hash and Page
     
@@ -77,19 +79,27 @@ public class BufferPool {
         //     return null;
         int pidHashCode = pid.hashCode();
         Page target = intPage.get(pidHashCode);
+        boolean pageEvicted = false;
         if (target == null) {
-            if (numInUse == NP)  // if the buffer pool is full
-                throw new DbException("No eviction policy");
-            else {  // load a page from disk through Dbfile's readPage method
-                DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
-                target = databaseFile.readPage(pid);
-                intPage.put(pidHashCode, target);
-                numInUse++;  // increment the number of pages in the buffer pool
-                return target;
+            if (numInUse >= NP) {  // if the buffer pool is full
+                evictPage();
+                pageEvicted = true;
+                System.out.println("evcit page" + numInUse);
             }
-        }
-        else
+            // load a page from disk through Dbfile's readPage method
+            DbFile databaseFile =  Database.getCatalog().getDatabaseFile(pid.getTableId());
+            target = databaseFile.readPage(pid);
+            intPage.put(pidHashCode, target);
+            if (!pageEvicted)
+                numInUse++;  // increment the number of pages in the buffer pool
+
+            MRU = pid;
             return target;
+        }
+        else {
+            MRU = pid;
+            return target;
+        }
     }
 
     /**
@@ -200,7 +210,10 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for lab1
-
+        Collection<Page> pages = intPage.values();
+        Iterator<Page> pterator = pages.iterator();
+        while (pterator.hasNext())
+            flushPage(pterator.next().getId());
     }
 
     /** Remove the specific page id from the buffer pool.
@@ -220,6 +233,13 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for lab1
+        int tableId = pid.getTableId();
+        DbFile databaseFile =  Database.getCatalog().getDatabaseFile(tableId);
+        Page page = intPage.get(pid.hashCode());
+        if (page.isDirty() == null) {
+            databaseFile.writePage(page);
+            page.markDirty(false, null);
+        }
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -236,6 +256,13 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for lab1
+        try {
+            flushPage(MRU);
+            intPage.remove(MRU.hashCode());
+        }
+        catch (Exception e) {
+            throw new DbException("cannot flush page");
+        }
     }
 
 }
