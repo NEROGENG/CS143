@@ -154,6 +154,16 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+        DbFile databaseFile =  Database.getCatalog().getDatabaseFile(tableId);
+        ArrayList<Page> pageList = databaseFile.insertTuple(tid, t);
+        for (int i = 0; i < pageList.size(); i++) {
+            Page temp = pageList.get(i);
+            int pidHashCode = temp.getId().hashCode();
+            temp.markDirty(true, tid);
+            if (intPage.remove(pidHashCode) == null)
+                throw new DbException("modified page not in BufferPool");
+            intPage.put(pidHashCode, temp);
+        }
     }
 
     /**
@@ -172,6 +182,17 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+        int tableId = t.getRecordId().getPageId().getTableId();
+        DbFile databaseFile =  Database.getCatalog().getDatabaseFile(tableId);
+        ArrayList<Page> pageList = databaseFile.deleteTuple(tid, t);
+        for (int i = 0; i < pageList.size(); i++) {
+            Page temp = pageList.get(i);
+            int pidHashCode = temp.getId().hashCode();
+            temp.markDirty(true, tid);
+            if (intPage.remove(pidHashCode) == null)
+                throw new DbException("modified page not in BufferPool");
+            intPage.put(pidHashCode, temp);
+        }
     }
 
     /**
