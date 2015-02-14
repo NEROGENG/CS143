@@ -70,7 +70,7 @@ public class Filter extends Operator {
         // some code goes here
         while (CHILD.hasNext()) {
             Tuple temp = CHILD.next();
-            if (PRE.filter(temp))
+            if (PRE.filter(temp))   // filter the tuple returned by the child operator
                 return temp;
         }
         return null;

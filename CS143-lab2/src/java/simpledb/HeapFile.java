@@ -33,7 +33,7 @@ public class HeapFile implements DbFile {
         pageSize = BufferPool.getPageSize();
         hpidarray = new ArrayList<HeapPageId>();
         NP = ((int)BF.length()) / pageSize;
-        for (int i = 0; i < numPages(); i++)
+        for (int i = 0; i < numPages(); i++)    // create a HeapPageId for each page in the HeapFile
             hpidarray.add(new HeapPageId(getId(), i));
     }
 
@@ -124,7 +124,7 @@ public class HeapFile implements DbFile {
         for (int i = 0; i < numPages(); i++) {
             HeapPage temp = (HeapPage)(Database.getBufferPool().getPage(
                 tid, hpidarray.get(i), Permissions.READ_WRITE));
-            if (temp.getNumEmptySlots() > 0) {
+            if (temp.getNumEmptySlots() > 0) {  // if there is page with empty slot(s)
                 temp.insertTuple(t);
                 pageList.add(temp);
                 newPageNeeded = false;
@@ -133,7 +133,7 @@ public class HeapFile implements DbFile {
         }
         if (newPageNeeded) {
             HeapPageId tempid = new HeapPageId(getId(), numPages());
-            hpidarray.add(tempid);
+            hpidarray.add(tempid);  // create a page if no page has empty slots
             HeapPage temp = new HeapPage(tempid, HeapPage.createEmptyPageData());
             temp.insertTuple(t);
             writePage(temp);

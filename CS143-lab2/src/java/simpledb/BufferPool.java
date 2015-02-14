@@ -91,9 +91,9 @@ public class BufferPool {
             target = databaseFile.readPage(pid);
             intPage.put(pidHashCode, target);
             if (!pageEvicted)
-                numInUse++;  // increment the number of pages in the buffer pool
+                numInUse++;  // increment the number of pages in the buffer pool if no page is evicted
 
-            MRU = pid;
+            MRU = pid;  // record the most recently used pageid
             return target;
         }
         else {
@@ -171,7 +171,7 @@ public class BufferPool {
             int pidHashCode = temp.getId().hashCode();
             // System.out.println(pidHashCode);
             temp.markDirty(true, tid);
-            intPage.put(pidHashCode, temp);
+            intPage.put(pidHashCode, temp); // update the affected pages
         }
     }
 
@@ -198,7 +198,7 @@ public class BufferPool {
             Page temp = pageList.get(i);
             int pidHashCode = temp.getId().hashCode();
             temp.markDirty(true, tid);
-            intPage.put(pidHashCode, temp);
+            intPage.put(pidHashCode, temp); // update the affected pages
         }
     }
 
@@ -238,7 +238,7 @@ public class BufferPool {
         Page page = intPage.get(pid.hashCode());
         if (page.isDirty() == null) {
             databaseFile.writePage(page);
-            page.markDirty(false, null);
+            page.markDirty(false, null);    // mark the page "not dirty"
         }
     }
 
@@ -258,7 +258,7 @@ public class BufferPool {
         // not necessary for lab1
         try {
             flushPage(MRU);
-            intPage.remove(MRU.hashCode());
+            intPage.remove(MRU.hashCode()); // remove page from hashmap
         }
         catch (Exception e) {
             throw new DbException("cannot flush page");

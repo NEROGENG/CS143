@@ -96,7 +96,7 @@ public class Insert extends Operator {
                 throw new DbException("Cannot insert tuple");
             }
         }
-        Tuple t = new Tuple(TD);
+        Tuple t = new Tuple(TD);    // create return tuple
         t.setField(0, new IntField(numInserted));
         inserted = true;
         return t;

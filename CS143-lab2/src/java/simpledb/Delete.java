@@ -82,7 +82,7 @@ public class Delete extends Operator {
                 throw new DbException("Cannot delete tuple");
             }
         }
-        Tuple t = new Tuple(TD);
+        Tuple t = new Tuple(TD);    // create return tuple
         t.setField(0, new IntField(numDeleted));
         deleted = true;
         return t;

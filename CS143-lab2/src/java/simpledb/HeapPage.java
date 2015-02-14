@@ -254,7 +254,7 @@ public class HeapPage implements Page {
         if (rid.getPageId() != pid || !isSlotUsed(tno))
             throw new DbException("Tuple is not on this page, or tuple slot is already empty.");
         else {
-            markSlotUsed(tno, false);
+            markSlotUsed(tno, false);   // update header
             tuples[tno] = null;
         }
     }
@@ -277,7 +277,7 @@ public class HeapPage implements Page {
             if (!isSlotUsed(i)) {
                 t.setRecordId(new RecordId(pid, i));
                 tuples[i] = t;
-                markSlotUsed(i, true);
+                markSlotUsed(i, true);  // update header
                 break;
             }
         }

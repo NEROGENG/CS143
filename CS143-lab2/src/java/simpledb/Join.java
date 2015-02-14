@@ -88,7 +88,7 @@ public class Join extends Operator {
                     for (; i < t3.getTupleDesc().numFields(); i++)
                         t3.setField(i, t2.getField(i - t1.getTupleDesc().numFields()));
                     // System.out.println(t3.toString());
-                    TARRAY.add(t3);
+                    TARRAY.add(t3); // create a array of the resulting tuples
                 }
             }
             CH2.rewind();
