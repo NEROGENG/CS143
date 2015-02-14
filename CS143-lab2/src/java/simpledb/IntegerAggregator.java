@@ -82,14 +82,18 @@ public class IntegerAggregator implements Aggregator {
        // if (what.toString() == "min"){
           if (what.toString() == "min"){
             System.out.println("min function:" + tup.toString());
-              if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
+                      IntField if1 = (IntField)(list.get(0).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() > if2.getValue()) {
                   list.set(0, tup);
                   System.out.println("min function:assigned");
                 }
               //  list.add(tup);
               }
         if (what.toString() == "max"){
-            if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))){
+                      IntField if1 = (IntField)(list.get(0).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() < if2.getValue()) {
               list.set(0, tup);
             }
            // list.add(tup);
@@ -164,8 +168,9 @@ public class IntegerAggregator implements Aggregator {
                 for (int i = 0; i < list.size(); i++){
                   //if the grouping type matches tup's type
                     if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){//check if that value is greater than tup
-                      
-                      if (list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
+                      IntField if1 = (IntField)(list.get(i).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() > if2.getValue()) {
                         //if it is then tup should be the "min"
                         list.set(i, tup);
                       //System.out.println("set");
@@ -181,7 +186,9 @@ public class IntegerAggregator implements Aggregator {
                 for (int i = 0; i < list.size(); i++){
                   if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
                     
-                    if (list.get(i).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) {
+                    IntField if1 = (IntField)(list.get(i).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() < if2.getValue()) {
                       list.set(i, tup);
                     }
                     return;
