@@ -1,5 +1,6 @@
-
 package simpledb;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 /**
@@ -35,16 +36,17 @@ public class IntegerAggregator implements Aggregator {
         this.afield = afield;
         this.what = what;
 
+          // grouping {g, a}
+          if (gbfield != Aggregator.NO_GROUPING) {
+            Type[] typeArray = {gbfieldtype, Type.INT_TYPE};
+            this.tupleDesc = new TupleDesc(typeArray);
+          }
 
-        if (gbfield != Aggregator.NO_GROUPING) {
-          Type[] typeArray = {gbfieldtype, Type.INT_TYPE};
-          this.tupleDesc = new TupleDesc(typeArray);
-        }
-
-        else {
-          Type[] typeArray = {Type.INT_TYPE};
-          this.tupleDesc = new TupleDesc(typeArray);
-        }
+          //no grouping
+          else {
+            Type[] typeArray = {Type.INT_TYPE};
+            this.tupleDesc = new TupleDesc(typeArray);
+          }
             list = new ArrayList<Tuple>();
             counts = new HashMap<Field, ArrayList<Integer>>();
         }
@@ -74,15 +76,67 @@ public class IntegerAggregator implements Aggregator {
               list.add(tup);
               return;
           }
+
         // switch (what.toString()) {
         //     case "min": 
-        if (what.toString() == "min")            {
+        if (what.toString() == "min"){
             System.out.println("min function:" + tup.toString());
               if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
                   list.set(0, tup);
                   System.out.println("min function:assigned");
                 }
               }
+        if (what == MAX){
+            if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))){
+              list.set(0, tup);
+            }
+        }
+        if (what == SUM){
+          //update sum, get the 0th value and then add the new tuple value
+          IntField f1 = (IntField)(tup.getField(afield));
+          IntField f2 = (IntField)(list.get(0).getField(afield));
+          Field f = new IntField(f1.getValue() + f2.getValue());
+          //calculate new sum, add to 0th field
+
+          list.get(0).setField(afield, f);
+        }
+        if (what == COUNT){
+          //update list.get(0)'s field with a new count of array
+            ArrayList<Integer> intarr = counts.get(new IntField(Aggregator.NO_GROUPING));
+            IntField input = (IntField)tup.getField(afield);
+            intarr.add(input.getValue());
+            //create new field based off new conut
+            IntField f1 = new IntField(intarr.size());
+            list.get(0).setField(afield,f1);
+
+
+
+        }
+        if (what == AVG){
+          //calculate the average and update the 0th field
+          //get every value of the whole list and caluclate sum
+          int sum = 0;
+          //convert from field to integer, but we have hash map
+          ArrayList<Integer> intarr = counts.get(new IntField(Aggregator.NO_GROUPING));  
+
+          
+          for (int i = 0; i < intarr.size(); i++){
+              sum += intarr.get(i);
+          }
+          //convert tuple into intfield, and calbulate sum
+          IntField input = (IntField) tup.getField(afield);
+          sum += input.getValue();
+          //add tuple value
+          intarr.add(input.getValue());
+          int avg =  sum/(intarr.size());
+
+          //now add to list and intarr
+          IntField f3 = new IntField(avg);
+          list.get(0).setField(afield, f3);
+
+
+        }
+
               //break;
             // case MAX: 
             //   if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) 
@@ -115,7 +169,7 @@ public class IntegerAggregator implements Aggregator {
             // list.get(0).setField(afield, f4);
             // break;
         //}
-        }
+        }// end if not grouping
           else {
 
           if (list.size() == 0) {
@@ -125,7 +179,7 @@ public class IntegerAggregator implements Aggregator {
                 values.add(f2.getValue());
                 counts.put(f1, values);
                 if (what == Op.COUNT) {
-                tup.setField(afield, new IntField(1));
+                    tup.setField(afield, new IntField(1));
                 }
                 list.add(tup);
                 return;
@@ -223,38 +277,41 @@ ArrayList<Integer> values = new ArrayList<Integer>();
 values.add(f2.getValue());
 counts.put(f1, values);
 }
-public void countGroupMerge(Tuple tup){
-for (int i = 0; i < list.size(); i++){
-if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-Field f1 = list.get(i).getField(gbfield);
-ArrayList<Integer> values = counts.get(f1);
-IntField fTemp = (IntField) tup.getField(afield);
-values.add(fTemp.getValue());
-IntField f2 = new IntField(values.size());
-list.get(i).setField(afield, f2);
-return;
-}
-}
-Field f1 = tup.getField(gbfield);
-IntField f2 = (IntField) tup.getField(afield);
-ArrayList<Integer> values = new ArrayList<Integer>();
-values.add(f2.getValue());
-counts.put(f1, values);
-tup.setField(afield, new IntField(1));
-list.add(tup);
-}
-/**
-* Create a DbIterator over group aggregate results.
-*
-* @return a DbIterator whose tuples are the pair (groupVal, aggregateVal)
-* if using group, or a single (aggregateVal) if no grouping. The
-* aggregateVal is determined by the type of aggregate specified in
-* the constructor.
-*/
-public DbIterator iterator() {
-// some code goes here
-return new TupleIterator(tupleDesc, list);
-}
+          public void countGroupMerge(Tuple tup){
+
+              for (int i = 0; i < list.size(); i++){
+
+              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+
+                  Field f1 = list.get(i).getField(gbfield);
+                  ArrayList<Integer> values = counts.get(f1);
+                  IntField fTemp = (IntField) tup.getField(afield);
+                  values.add(fTemp.getValue());
+                  IntField f2 = new IntField(values.size());
+                  list.get(i).setField(afield, f2);
+                  return;
+                  }
+              }
+                Field f1 = tup.getField(gbfield);
+                IntField f2 = (IntField) tup.getField(afield);
+                ArrayList<Integer> values = new ArrayList<Integer>();
+                values.add(f2.getValue());
+                counts.put(f1, values);
+                tup.setField(afield, new IntField(1));
+                list.add(tup);
+          } 
+          /**
+          * Create a DbIterator over group aggregate results.
+          *
+          * @return a DbIterator whose tuples are the pair (groupVal, aggregateVal)
+          * if using group, or a single (aggregateVal) if no grouping. The
+          * aggregateVal is determined by the type of aggregate specified in
+          * the constructor.
+          */
+          public DbIterator iterator() {
+              // some code goes here
+                  return new TupleIterator(tupleDesc, list);
+              }
 }
 
     
