@@ -159,7 +159,7 @@ public class IntegerAggregator implements Aggregator {
           }
          
           if (what == Op.MIN){
-                System.out.println("min function" +tup.toString());
+                //System.out.println("min function" +tup.toString());
                 //for every group, find the matching grouping field
                 for (int i = 0; i < list.size(); i++){
                   //if the grouping type matches tup's type
@@ -168,9 +168,10 @@ public class IntegerAggregator implements Aggregator {
                       if (list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
                         //if it is then tup should be the "min"
                         list.set(i, tup);
-                      System.out.println("set");
-                      return;
+                      //System.out.println("set");
+                      
                       }
+                      return;
                     }
                 }
                 list.add(tup);
