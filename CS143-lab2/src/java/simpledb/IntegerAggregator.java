@@ -79,17 +79,20 @@ public class IntegerAggregator implements Aggregator {
 
         // switch (what.toString()) {
         //     case "min": 
-        if (what.toString() == "min"){
+       // if (what.toString() == "min"){
+          if (what == MIN){
             System.out.println("min function:" + tup.toString());
               if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
                   list.set(0, tup);
                   System.out.println("min function:assigned");
                 }
+              //  list.add(tup);
               }
         if (what == MAX){
             if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))){
               list.set(0, tup);
             }
+           // list.add(tup);
         }
         if (what == SUM){
           //update sum, get the 0th value and then add the new tuple value
@@ -99,6 +102,7 @@ public class IntegerAggregator implements Aggregator {
           //calculate new sum, add to 0th field
 
           list.get(0).setField(afield, f);
+          //list.add(tup);
         }
         if (what == COUNT){
           //update list.get(0)'s field with a new count of array
@@ -109,7 +113,7 @@ public class IntegerAggregator implements Aggregator {
             IntField f1 = new IntField(intarr.size());
             list.get(0).setField(afield,f1);
 
-
+            //list.add(tup);
 
         }
         if (what == AVG){
@@ -134,44 +138,13 @@ public class IntegerAggregator implements Aggregator {
           IntField f3 = new IntField(avg);
           list.get(0).setField(afield, f3);
 
-
+          // list.add(tup);
         }
 
-              //break;
-            // case MAX: 
-            //   if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) 
-            //   list.set(0, tup);
-            //   break;
-            // case SUM: 
-            //   IntField f1 = (IntField)(list.get(0).getField(afield));
-            //   IntField f2 =(IntField)(tup.getField(afield));
-            //   Field f = new IntField(f1.getValue() + f2.getValue());
-            //   list.get(0).setField(afield, f);
-            //   break;
-            // case AVG: 
-            // ArrayList<Integer> values = counts.get(new IntField(Aggregator.NO_GROUPING));
-            // IntField fTemp = (IntField) tup.getField(afield);
-            // values.add(fTemp.getValue());
-            // int sum = 0;
-            // for (int j = 0; j < values.size(); j++){
-            //   sum += values.get(j);
-            // }
-            // int calculation = sum/values.size();
-            // IntField f3 = new IntField(calculation);
-            // list.get(0).setField(afield, f3);
-                       
-            // break;
-            // case COUNT: 
-            // ArrayList<Integer> values1 = counts.get(new IntField(Aggregator.NO_GROUPING));
-            // IntField fTemp1 = (IntField) tup.getField(afield);
-            // values1.add(fTemp1.getValue());
-            // IntField f4 = new IntField(values1.size());
-            // list.get(0).setField(afield, f4);
-            // break;
-        //}
+              
         }// end if not grouping
-          else {
-
+          else {//if grouping
+              //if list is empty, add values and list
           if (list.size() == 0) {
                 Field f1 = tup.getField(gbfield);
                 IntField f2 = (IntField) tup.getField(afield);
@@ -184,122 +157,120 @@ public class IntegerAggregator implements Aggregator {
                 list.add(tup);
                 return;
           }
-          switch (what) {
-          case MIN: 
+         
+          if (what == MIN){
                 System.out.println("min function" +tup.toString());
+                //for every group, find the matching grouping field
                 for (int i = 0; i < list.size(); i++){
-                    if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-                  boolean comp = list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield));
-                  if (comp) {
-                    list.set(i, tup);
-                  System.out.println("set");
+                  //if the grouping type matches tup's type
+                    if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){//check if that value is greater than tup
+                      
+                      if (list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
+                        //if it is then tup should be the "min"
+                        list.set(i, tup);
+                      System.out.println("set");
+                      return;
+                      }
+                    }
                 }
-              }}
-                  break;
-          case MAX: 
-
+                list.add(tup);
+             }
+          if( what == MAX){
+                //similar but uses less than predicate
                 for (int i = 0; i < list.size(); i++){
-                if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-                boolean comp = list.get(i).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield));
-                if (comp) 
-                list.set(i, tup);}
-            }
+                  if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+                    
+                    if (list.get(i).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) {
+                      list.set(i, tup);
+                    }
+                    return;
+                  }
+                }
+                list.add(tup);
 
-                break;
-          case SUM: sumGroupMerge(tup);
-          break;
-          case AVG: avgGroupMerge(tup);
-          break;
-          case COUNT: countGroupMerge(tup);
-          break;
-      }//end switch
+          }
+
+          if (what == SUM){
+            //first find the field
+            for (int i = 0; i < list.size(); i++){
+              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+                //now we need to add to sum
+                IntField f1 = (IntField)tup.getField(afield);
+                IntFeild f2 = (IntField)list.get(i).getField(afield);
+                //calculate sum
+                int sum = f1.getValue() + f2.getValue();
+                Field temp = new IntField(sum);
+                //save to list
+                list.get(i).setField(temp);
+                return;
+              }
+            }
+            list.add(tup);
+          }
+
+
+          if (what == AVG){
+            for (int i = 0; i < list.size(); i++){
+              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+
+                //calculate average
+                ArrayList<Integer> tempal = counts.get(list.get(i).getField(gbfield));
+                //add values to asum
+                int sum = 0;
+                for (int i = 0; i < tempal.size(); i ++){
+                    sum += tempal.get(i).getValue();
+                }//sum has value
+
+                //interact with intput tuple
+                IntField f1 = (IntField) tup.getField(afield);
+                sum += f1.getValue();
+                tempal.add (f1);
+                int avg = sum/tempal.size();
+                //remember to add back to counts
+                IntField out = new IntField(avg);
+                list.get(i).setField(afield,out);
+                return;
+              }
+            }
+            //hash doens't exist for that gfield, create one
+            list.add(tup);
+            //adjust counts with new member, {g a}
+            Field f = tup.getField(gbfield);
+            IntField if1 = tup.getField(afield);
+            ArrayList<Integer> temp = new ArrayList<Integer>();
+            temp.add(if1.getValue);//new value to array list
+            counts.put(f, 1f2);// add to hash map {g, a}
+          }
+          if (what == COUNT){
+              for (int i = 0; i < list.size(); i++){
+                if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+                  //calculate count...
+                  //convert input tuple
+                  IntField f1 = (IntField)tup.getField(afield);
+                  ArrayList<Integer> tempal = counts.get(list.get(i).getField(gbfield));
+                  tempal.add(f1.getValue());
+                  //generate new field to set list.get(i) to 
+                  IntField f2 = new IntField(tempal.size());
+                  list.get(i).setField(afield, f2);
+                  return;
+                }
+              }
+              list.add(tup);
+              //adjust counts with new member, {g a}
+              Field f = tup.getField(gbfield);
+              IntField if1 = tup.getField(afield);
+              ArrayList<Integer> temp = new ArrayList<Integer>();
+              temp.add(if1.getValue);//new value to array list
+              counts.put(f, 1f2);// add to hash map {g, a}
+              IntField counted = new IntField(1);
+              tup.setField(afield,counted);
+
+          }
+      
       }//end else
 }//end function
 
 
-public void minGroupMerge(Tuple tup){
-for (int i = 0; i < list.size(); i++){
-if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-boolean comp = list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield));
-if (comp) {
-list.set(i, tup);
-}
-return;
-}
-}
-list.add(tup);
-}
-public void maxGroupMerge(Tuple tup){
-for (int i = 0; i < list.size(); i++){
-if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-boolean comp = list.get(i).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield));
-if (comp) {
-list.set(i, tup);
-}
-return;
-}
-}
-list.add(tup);
-}
-public void sumGroupMerge(Tuple tup){
-for (int i = 0; i < list.size(); i++){
-if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-IntField f1 = (IntField)(list.get(i).getField(afield));
-IntField f2 =(IntField)(tup.getField(afield));
-Field f = new IntField(f1.getValue() + f2.getValue());
-list.get(i).setField(afield, f);
-return;
-}
-}
-list.add(tup);
-}
-public void avgGroupMerge(Tuple tup){
-for (int i = 0; i < list.size(); i++){
-if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-Field f1 = list.get(i).getField(gbfield);
-ArrayList<Integer> values = counts.get(f1);
-IntField fTemp = (IntField) tup.getField(afield);
-values.add(fTemp.getValue());
-int sum = 0;
-for (int j = 0; j < values.size(); j++){
-sum += values.get(j);
-}
-int calculation = sum/values.size();
-IntField f2 = new IntField(calculation);
-list.get(i).setField(afield, f2);
-return;
-}
-}
-list.add(tup);
-Field f1 = tup.getField(gbfield);
-IntField f2 = (IntField) tup.getField(afield);
-ArrayList<Integer> values = new ArrayList<Integer>();
-values.add(f2.getValue());
-counts.put(f1, values);
-}
-          public void countGroupMerge(Tuple tup){
-
-              for (int i = 0; i < list.size(); i++){
-
-              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-
-                  Field f1 = list.get(i).getField(gbfield);
-                  ArrayList<Integer> values = counts.get(f1);
-                  IntField fTemp = (IntField) tup.getField(afield);
-                  values.add(fTemp.getValue());
-                  IntField f2 = new IntField(values.size());
-                  list.get(i).setField(afield, f2);
-                  return;
-                  }
-              }
-                Field f1 = tup.getField(gbfield);
-                IntField f2 = (IntField) tup.getField(afield);
-                ArrayList<Integer> values = new ArrayList<Integer>();
-                values.add(f2.getValue());
-                counts.put(f1, values);
-                tup.setField(afield, new IntField(1));
-                list.add(tup);
-          } 
           /**
           * Create a DbIterator over group aggregate results.
           *
