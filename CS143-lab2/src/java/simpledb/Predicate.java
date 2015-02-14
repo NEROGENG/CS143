@@ -43,6 +43,9 @@ public class Predicate implements Serializable {
         }
 
     }
+    private int fieldnum;
+    private Op thisop;
+    private Field thisfield;
     
     /**
      * Constructor.
@@ -56,6 +59,9 @@ public class Predicate implements Serializable {
      */
     public Predicate(int field, Op op, Field operand) {
         // some code goes here
+        fieldnum = field;
+        thisop = op;
+        thisfield = operand;
     }
 
     /**
@@ -64,7 +70,8 @@ public class Predicate implements Serializable {
     public int getField()
     {
         // some code goes here
-        return -1;
+        //return -1;
+        return fieldnum;
     }
 
     /**
@@ -73,16 +80,18 @@ public class Predicate implements Serializable {
     public Op getOp()
     {
         // some code goes here
-        return null;
+        //return null;
+        return thisop;
     }
     
     /**
      * @return the operand
      */
-    public Field getOperand()
+    public simpledb.Field getOperand()
     {
         // some code goes here
-        return null;
+        //return null;
+        return thisfield;
     }
     
     /**
@@ -97,7 +106,8 @@ public class Predicate implements Serializable {
      */
     public boolean filter(Tuple t) {
         // some code goes here
-        return false;
+        //return false;
+
     }
 
     /**
