@@ -80,7 +80,7 @@ public class IntegerAggregator implements Aggregator {
         // switch (what.toString()) {
         //     case "min": 
        // if (what.toString() == "min"){
-          if (what == MIN){
+          if (what.toString() == "min"){
             System.out.println("min function:" + tup.toString());
               if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
                   list.set(0, tup);
@@ -88,13 +88,13 @@ public class IntegerAggregator implements Aggregator {
                 }
               //  list.add(tup);
               }
-        if (what == MAX){
+        if (what.toString() == "max"){
             if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))){
               list.set(0, tup);
             }
            // list.add(tup);
         }
-        if (what == SUM){
+        if (what.toString() == "sum"){
           //update sum, get the 0th value and then add the new tuple value
           IntField f1 = (IntField)(tup.getField(afield));
           IntField f2 = (IntField)(list.get(0).getField(afield));
@@ -104,7 +104,7 @@ public class IntegerAggregator implements Aggregator {
           list.get(0).setField(afield, f);
           //list.add(tup);
         }
-        if (what == COUNT){
+        if (what.toString() == "count"){
           //update list.get(0)'s field with a new count of array
             ArrayList<Integer> intarr = counts.get(new IntField(Aggregator.NO_GROUPING));
             IntField input = (IntField)tup.getField(afield);
@@ -116,7 +116,7 @@ public class IntegerAggregator implements Aggregator {
             //list.add(tup);
 
         }
-        if (what == AVG){
+        if (what.toString() == "avg"){
           //calculate the average and update the 0th field
           //get every value of the whole list and caluclate sum
           int sum = 0;
@@ -158,7 +158,7 @@ public class IntegerAggregator implements Aggregator {
                 return;
           }
          
-          if (what == MIN){
+          if (what == Op.MIN){
                 System.out.println("min function" +tup.toString());
                 //for every group, find the matching grouping field
                 for (int i = 0; i < list.size(); i++){
@@ -175,7 +175,7 @@ public class IntegerAggregator implements Aggregator {
                 }
                 list.add(tup);
              }
-          if( what == MAX){
+          if( what == Op.MAX){
                 //similar but uses less than predicate
                 for (int i = 0; i < list.size(); i++){
                   if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
@@ -190,18 +190,18 @@ public class IntegerAggregator implements Aggregator {
 
           }
 
-          if (what == SUM){
+          if (what == Op.SUM){
             //first find the field
             for (int i = 0; i < list.size(); i++){
               if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
                 //now we need to add to sum
                 IntField f1 = (IntField)tup.getField(afield);
-                IntFeild f2 = (IntField)list.get(i).getField(afield);
+                IntField f2 = (IntField)list.get(i).getField(afield);
                 //calculate sum
                 int sum = f1.getValue() + f2.getValue();
                 Field temp = new IntField(sum);
                 //save to list
-                list.get(i).setField(temp);
+                list.get(i).setField(afield,temp);
                 return;
               }
             }
@@ -209,7 +209,7 @@ public class IntegerAggregator implements Aggregator {
           }
 
 
-          if (what == AVG){
+          if (what == Op.AVG){
             for (int i = 0; i < list.size(); i++){
               if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
 
@@ -217,14 +217,14 @@ public class IntegerAggregator implements Aggregator {
                 ArrayList<Integer> tempal = counts.get(list.get(i).getField(gbfield));
                 //add values to asum
                 int sum = 0;
-                for (int i = 0; i < tempal.size(); i ++){
-                    sum += tempal.get(i).getValue();
+                for (int j = 0; j < tempal.size(); j ++){
+                    sum += tempal.get(j);
                 }//sum has value
 
                 //interact with intput tuple
                 IntField f1 = (IntField) tup.getField(afield);
                 sum += f1.getValue();
-                tempal.add (f1);
+                tempal.add (f1.getValue());
                 int avg = sum/tempal.size();
                 //remember to add back to counts
                 IntField out = new IntField(avg);
@@ -236,12 +236,12 @@ public class IntegerAggregator implements Aggregator {
             list.add(tup);
             //adjust counts with new member, {g a}
             Field f = tup.getField(gbfield);
-            IntField if1 = tup.getField(afield);
+            IntField if1 = (IntField)tup.getField(afield);
             ArrayList<Integer> temp = new ArrayList<Integer>();
-            temp.add(if1.getValue);//new value to array list
-            counts.put(f, 1f2);// add to hash map {g, a}
+            temp.add(if1.getValue());//new value to array list
+            counts.put(f,temp);// add to hash map {g, a}
           }
-          if (what == COUNT){
+          if (what == Op.COUNT){
               for (int i = 0; i < list.size(); i++){
                 if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
                   //calculate count...
@@ -258,10 +258,10 @@ public class IntegerAggregator implements Aggregator {
               list.add(tup);
               //adjust counts with new member, {g a}
               Field f = tup.getField(gbfield);
-              IntField if1 = tup.getField(afield);
+              IntField if1 =(IntField) tup.getField(afield);
               ArrayList<Integer> temp = new ArrayList<Integer>();
-              temp.add(if1.getValue);//new value to array list
-              counts.put(f, 1f2);// add to hash map {g, a}
+              temp.add(if1.getValue());//new value to array list
+              counts.put(f,temp);// add to hash map {g, a}
               IntField counted = new IntField(1);
               tup.setField(afield,counted);
 
