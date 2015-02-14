@@ -59,8 +59,9 @@ public class IntegerAggregator implements Aggregator {
         */
         public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
-        
+        //check for grouping
         if (gbfield == Aggregator.NO_GROUPING){
+          //initialize for empty list
           if (list.size() == 0) {
               IntField f = (IntField) tup.getField(afield);
               ArrayList<Integer> values = new ArrayList<Integer>();
@@ -73,42 +74,47 @@ public class IntegerAggregator implements Aggregator {
               list.add(tup);
               return;
           }
-        switch (what) {
-            case MIN:             
-              if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) 
+        // switch (what.toString()) {
+        //     case "min": 
+        if (what.toString() == "min")            {
+            System.out.println("min function:" + tup.toString());
+              if (list.get(0).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield))) {
                   list.set(0, tup);
-              break;
-            case MAX: 
-              if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) 
-              list.set(0, tup);
-              break;
-            case SUM: 
-              IntField f1 = (IntField)(list.get(0).getField(afield));
-              IntField f2 =(IntField)(tup.getField(afield));
-              Field f = new IntField(f1.getValue() + f2.getValue());
-              list.get(0).setField(afield, f);
-              break;
-            case AVG: 
-            ArrayList<Integer> values = counts.get(new IntField(Aggregator.NO_GROUPING));
-            IntField fTemp = (IntField) tup.getField(afield);
-            values.add(fTemp.getValue());
-            int sum = 0;
-            for (int j = 0; j < values.size(); j++){
-              sum += values.get(j);
-            }
-            int calculation = sum/values.size();
-            IntField f3 = new IntField(calculation);
-            list.get(0).setField(afield, f3);
+                  System.out.println("min function:assigned");
+                }
+              }
+              //break;
+            // case MAX: 
+            //   if (list.get(0).getField(afield).compare(Predicate.Op.LESS_THAN, tup.getField(afield))) 
+            //   list.set(0, tup);
+            //   break;
+            // case SUM: 
+            //   IntField f1 = (IntField)(list.get(0).getField(afield));
+            //   IntField f2 =(IntField)(tup.getField(afield));
+            //   Field f = new IntField(f1.getValue() + f2.getValue());
+            //   list.get(0).setField(afield, f);
+            //   break;
+            // case AVG: 
+            // ArrayList<Integer> values = counts.get(new IntField(Aggregator.NO_GROUPING));
+            // IntField fTemp = (IntField) tup.getField(afield);
+            // values.add(fTemp.getValue());
+            // int sum = 0;
+            // for (int j = 0; j < values.size(); j++){
+            //   sum += values.get(j);
+            // }
+            // int calculation = sum/values.size();
+            // IntField f3 = new IntField(calculation);
+            // list.get(0).setField(afield, f3);
                        
-            break;
-            case COUNT: 
-            ArrayList<Integer> values1 = counts.get(new IntField(Aggregator.NO_GROUPING));
-            IntField fTemp1 = (IntField) tup.getField(afield);
-            values1.add(fTemp1.getValue());
-            IntField f4 = new IntField(values1.size());
-            list.get(0).setField(afield, f4);
-            break;
-        }
+            // break;
+            // case COUNT: 
+            // ArrayList<Integer> values1 = counts.get(new IntField(Aggregator.NO_GROUPING));
+            // IntField fTemp1 = (IntField) tup.getField(afield);
+            // values1.add(fTemp1.getValue());
+            // IntField f4 = new IntField(values1.size());
+            // list.get(0).setField(afield, f4);
+            // break;
+        //}
         }
           else {
 
@@ -126,11 +132,14 @@ public class IntegerAggregator implements Aggregator {
           }
           switch (what) {
           case MIN: 
+                System.out.println("min function" +tup.toString());
                 for (int i = 0; i < list.size(); i++){
                     if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
                   boolean comp = list.get(i).getField(afield).compare(Predicate.Op.GREATER_THAN, tup.getField(afield));
-                  if (comp) 
+                  if (comp) {
                     list.set(i, tup);
+                  System.out.println("set");
+                }
               }}
                   break;
           case MAX: 
