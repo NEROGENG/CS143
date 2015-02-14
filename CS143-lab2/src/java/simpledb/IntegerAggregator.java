@@ -161,63 +161,7 @@ public class IntegerAggregator implements Aggregator {
                 list.add(tup);
                 return;
           }
-         
-          if (what == Op.MIN){
-                //System.out.println("min function" +tup.toString());
-                //for every group, find the matching grouping field
-                for (int i = 0; i < list.size(); i++){
-                  //if the grouping type matches tup's type
-                    if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){//check if that value is greater than tup
-                      IntField if1 = (IntField)(list.get(i).getField(afield));
-                      IntField if2 = (IntField)(tup.getField(afield));
-                      if (if1.getValue() > if2.getValue()) {
-                        //if it is then tup should be the "min"
-                        list.set(i, tup);
-                      //System.out.println("set");
-                      
-                      }
-                      return;
-                    }
-                }
-                list.add(tup);
-             }
-          if( what == Op.MAX){
-                //similar but uses less than predicate
-                for (int i = 0; i < list.size(); i++){
-                  if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-                    
-                    IntField if1 = (IntField)(list.get(i).getField(afield));
-                      IntField if2 = (IntField)(tup.getField(afield));
-                      if (if1.getValue() < if2.getValue()) {
-                      list.set(i, tup);
-                    }
-                    return;
-                  }
-                }
-                list.add(tup);
-
-          }
-
-          if (what == Op.SUM){
-            //first find the field
-            for (int i = 0; i < list.size(); i++){
-              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
-                //now we need to add to sum
-                IntField f1 = (IntField)tup.getField(afield);
-                IntField f2 = (IntField)list.get(i).getField(afield);
-                //calculate sum
-                int sum = f1.getValue() + f2.getValue();
-                Field temp = new IntField(sum);
-                //save to list
-                list.get(i).setField(afield,temp);
-                return;
-              }
-            }
-            list.add(tup);
-          }
-
-
-          if (what == Op.AVG){
+         if (what == Op.AVG){
             for (int i = 0; i < list.size(); i++){
               if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
 
@@ -249,6 +193,62 @@ public class IntegerAggregator implements Aggregator {
             temp.add(if1.getValue());//new value to array list
             counts.put(f,temp);// add to hash map {g, a}
           }
+          if (what == Op.MIN){
+                //System.out.println("min function" +tup.toString());
+                //for every group, find the matching grouping field
+                for (int i = 0; i < list.size(); i++){
+                  //if the grouping type matches tup's type
+                    if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){//check if that value is greater than tup
+                      IntField if1 = (IntField)(list.get(i).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() > if2.getValue()) {
+                        //if it is then tup should be the "min"
+                        list.set(i, tup);
+                      //System.out.println("set");
+                      
+                      }
+                      return;
+                    }
+                }
+                list.add(tup);
+             }
+          
+
+          if (what == Op.SUM){
+            //first find the field
+            for (int i = 0; i < list.size(); i++){
+              if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+                //now we need to add to sum
+                IntField f1 = (IntField)tup.getField(afield);
+                IntField f2 = (IntField)list.get(i).getField(afield);
+                //calculate sum
+                int sum = f1.getValue() + f2.getValue();
+                Field temp = new IntField(sum);
+                //save to list
+                list.get(i).setField(afield,temp);
+                return;
+              }
+            }
+            list.add(tup);
+          }
+
+          if( what == Op.MAX){
+                //similar but uses less than predicate
+                for (int i = 0; i < list.size(); i++){
+                  if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
+                    
+                    IntField if1 = (IntField)(list.get(i).getField(afield));
+                      IntField if2 = (IntField)(tup.getField(afield));
+                      if (if1.getValue() < if2.getValue()) {
+                      list.set(i, tup);
+                    }
+                    return;
+                  }
+                }
+                list.add(tup);
+
+          }
+          
           if (what == Op.COUNT){
               for (int i = 0; i < list.size(); i++){
                 if (list.get(i).getField(gbfield).equals(tup.getField(gbfield))){
