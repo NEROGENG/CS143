@@ -10,13 +10,13 @@ import simpledb.Aggregator.Op;
 public class StringAggregator implements Aggregator {
         private static final long serialVersionUID = 1L;
 
-
+        //set at constructor
         private int gbfield;        
         private int afield;
         private Op what;
         private TupleDesc tupleDesc;
 
-
+        // g->a
         private ArrayList<Tuple> list;
         private HashMap<Field, ArrayList<String>> map;
 
@@ -24,6 +24,7 @@ public class StringAggregator implements Aggregator {
         //tuples not working, mismatched, need temporary td
         //for integers
         private TupleDesc td;
+        
         /**
         * Aggregate constructor
         * @param gbfield the 0-based index of the group-by field in the tuple, or NO_GROUPING if there is no grouping

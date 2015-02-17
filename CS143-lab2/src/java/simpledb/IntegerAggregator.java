@@ -8,13 +8,12 @@ import java.util.HashMap;
 */
 public class IntegerAggregator implements Aggregator {
       private static final long serialVersionUID = 1L;
-      int gbfield;
-      Type gbfieldtype;
-      int afield;
-      Op what;
-      TupleDesc tupleDesc;
-      ArrayList<Tuple> list;
-      HashMap<Field, ArrayList<Integer>> counts;
+      private int gbfield;      
+      private int afield;
+      private Op what;
+      private TupleDesc tupleDesc;
+      private ArrayList<Tuple> list;
+      private HashMap<Field, ArrayList<Integer>> counts;
       /**
       * Aggregate constructor
       *
@@ -32,7 +31,7 @@ public class IntegerAggregator implements Aggregator {
         public IntegerAggregator(int gbfield, Type gbfieldtype, int afield, Op what) {
         // some code goes here
         this.gbfield = gbfield;
-        this.gbfieldtype = gbfieldtype;
+        
         this.afield = afield;
         this.what = what;
 

@@ -43,6 +43,7 @@ public class Aggregate extends Operator {
         
         if (gfield == Aggregator.NO_GROUPING) {
             //no grouping so only add aggregate field
+            //from iterator create new TupleDesc
             Type t[] = { mychild.getTupleDesc().getFieldType(aggregateField())};
             String[] s = {mychild.getTupleDesc().getFieldName(aggregateField())};
             desc = new TupleDesc(t,s);
@@ -54,6 +55,7 @@ public class Aggregate extends Operator {
             desc = new TupleDesc(t,s);
         }
     }
+
         /**
         * @return If this aggregate is accompanied by a groupby, return the groupby
         * field index in the <b>INPUT</b> tuples. If not, return
@@ -66,101 +68,108 @@ public class Aggregate extends Operator {
             return this.gfield;
         
         }
-            /**
-            * @return If this aggregate is accompanied by a group by, return the name
-            * of the groupby field in the <b>OUTPUT</b> tuples If not, return
-            * null;
-            * */
-            public String groupFieldName() {
-                // some code goes here
-                if (this.gfield != Aggregator.NO_GROUPING){
-                    return mychild.getTupleDesc().getFieldName(this.gfield);
-                }
-                return null;
-            }
-            /**
-            * @return the aggregate field
-            * */
-            public int aggregateField() {
+
+        /**
+        * @return If this aggregate is accompanied by a group by, return the name
+        * of the groupby field in the <b>OUTPUT</b> tuples If not, return
+        * null;
+        * */
+
+        public String groupFieldName() {
             // some code goes here
-                return this.afield;
+            if (this.gfield != Aggregator.NO_GROUPING){
+                return mychild.getTupleDesc().getFieldName(this.gfield);
             }
+            return null;
+        }
+
+        /**
+        * @return the aggregate field
+        * */
+
+        public int aggregateField() {
+        // some code goes here
+            return afield;
+        }
 
             /**
             * @return return the name of the aggregate field in the <b>OUTPUT</b>
             * tuples
             * */
+
             public String aggregateFieldName() {
                 // some code goes here
                 return mychild.getTupleDesc().getFieldName(aggregateField());
             }
-            /**
-            * @return return the aggregate operator
-            * */
-            public Aggregator.Op aggregateOp() {
-            // some code goes here
-                return this.aop;
-            }
+
+        /**
+        * @return return the aggregate operator
+        * */
+
+        public Aggregator.Op aggregateOp() {
+        // some code goes here
+            return this.aop;
+        }
 
 
-            public static String nameOfAggregatorOp(Aggregator.Op aop) {
-                return aop.toString();
-            }
+        public static String nameOfAggregatorOp(Aggregator.Op aop) {
+            
+            return aop.toString();
 
+        }
+
+            //open opens iterator of the String or Int agg
             public void open() throws NoSuchElementException, DbException,
             TransactionAbortedException {
-            // some code goes here
-            super.open();
-            Aggregator tempAgg = null;
+                // some code goes here
+                //need to open the operaterinterface
+                super.open();
+                Aggregator tempAgg = null;
 
-            Type temp = mychild.getTupleDesc().getFieldType(aggregateField());
-            if (gfield == Aggregator.NO_GROUPING) {
+                Type temp = mychild.getTupleDesc().getFieldType(aggregateField());
 
-                if (temp == Type.STRING_TYPE){
-                    tempAgg = new StringAggregator(Aggregator.NO_GROUPING, null, 0, this.aggregateOp());
+                if (gfield == Aggregator.NO_GROUPING) {//no grouping
+                    //string or int
+                    if (temp == Type.STRING_TYPE){
+                        tempAgg = new StringAggregator(Aggregator.NO_GROUPING, null, 0, this.aggregateOp());
+                    }
+                    else {
+                        tempAgg = new IntegerAggregator(Aggregator.NO_GROUPING, null, 0, this.aggregateOp());
+                    }
+                    
+                }//end grouping
+                else {//grouping
+                    if (temp == Type.STRING_TYPE){
+                        tempAgg = new StringAggregator(0, mychild.getTupleDesc().getFieldType(this.groupField()), 1, this.aggregateOp());
+                    }
+                    else{
+                        tempAgg = new IntegerAggregator(0, mychild.getTupleDesc().getFieldType(this.groupField()), 1, this.aggregateOp());
+                    }
+                    
                 }
-                else if (temp == Type.INT_TYPE){
-                    tempAgg = new IntegerAggregator(Aggregator.NO_GROUPING, null, 0, this.aggregateOp());
-                }
-                else {
-                    throw new NoSuchElementException();
-                }
-            }
-            else {
-                
-                if (temp == Type.STRING_TYPE){
-                    tempAgg = new StringAggregator(0, mychild.getTupleDesc().getFieldType(this.groupField()), 1, this.aggregateOp());
-                }
-                else if (temp == Type.INT_TYPE){
-                    tempAgg = new IntegerAggregator(0, mychild.getTupleDesc().getFieldType(this.groupField()), 1, this.aggregateOp());
-                }
-                else {
-                     throw new NoSuchElementException();
-                }
-            }
 
 
-            mychild.open();
-            //merge tuples into aggregate
-            //for every tuple
-            while (mychild.hasNext()) {
-                Tuple tempTup = mychild.next();
-                Tuple newT = new Tuple(desc);
-                if (gfield == Aggregator.NO_GROUPING) {
-                    //only enter aggregate
-                    newT.setField(0, tempTup.getField(aggregateField()));
+                mychild.open();
+                //merge tuples into aggregate
+                //for every tuple
+                while (mychild.hasNext()) {
+                    Tuple tempTup = mychild.next();
+                    Tuple newT = new Tuple(desc);
+                    if (gfield == Aggregator.NO_GROUPING) {
+                        //only enter aggregate
+                        newT.setField(0, tempTup.getField(aggregateField()));
+                    }
+                    else {
+                        // Tuple{g,a}
+                        newT.setField(0, tempTup.getField(gfield));
+                        newT.setField(1, tempTup.getField(aggregateField()));
+                    }
+                        tempAgg.mergeTupleIntoGroup(newT);
                 }
-                else {
-                    // Tuple{g,a}
-                    newT.setField(0, tempTup.getField(gfield));
-                    newT.setField(1, tempTup.getField(aggregateField()));
-                }
-                    tempAgg.mergeTupleIntoGroup(newT);
-            }
 
-            mychild.close();
-            this.iterator = tempAgg.iterator();
-            this.iterator.open();
+                mychild.close();
+                this.iterator = tempAgg.iterator();
+                this.iterator.open();
         }
         /**
         * Returns the next tuple. If there is a group by field, then the first
