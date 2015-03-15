@@ -8,6 +8,9 @@ import java.util.*;
 public class Filter extends Operator {
 
     private static final long serialVersionUID = 1L;
+    private Predicate PRE;
+    private DbIterator CHILD;
+    private DbIterator[] CHILDREN;
 
     /**
      * Constructor accepts a predicate to apply and a child operator to read
@@ -20,29 +23,37 @@ public class Filter extends Operator {
      */
     public Filter(Predicate p, DbIterator child) {
         // some code goes here
+        PRE = p;
+        CHILD = child;
+        CHILDREN = new DbIterator[] {CHILD};
     }
 
     public Predicate getPredicate() {
         // some code goes here
-        return null;
+        return PRE;
     }
 
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return CHILD.getTupleDesc();
     }
 
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
+        CHILD.open();
+        super.open();
     }
 
     public void close() {
         // some code goes here
+        super.close();
+        CHILD.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+        CHILD.rewind();
     }
 
     /**
@@ -57,18 +68,25 @@ public class Filter extends Operator {
     protected Tuple fetchNext() throws NoSuchElementException,
             TransactionAbortedException, DbException {
         // some code goes here
+        while (CHILD.hasNext()) {
+            Tuple temp = CHILD.next();
+            if (PRE.filter(temp))   // filter the tuple returned by the child operator
+                return temp;
+        }
         return null;
     }
 
     @Override
     public DbIterator[] getChildren() {
         // some code goes here
-        return null;
+        return CHILDREN;
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
         // some code goes here
+        CHILDREN = children;
+        CHILD = CHILDREN[0];
     }
 
 }
