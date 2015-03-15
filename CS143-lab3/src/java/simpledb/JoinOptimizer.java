@@ -146,16 +146,14 @@ public class JoinOptimizer {
                 case EQUALS:
                 case NOT_EQUALS:
                 {
+                    // equality joins
                     if (t1pkey) {
-                        System.out.println("b");
                         return card2;
                     }
                     if (t2pkey) {
-                        System.out.println("c");
                         return card1;
                     }
                     else {
-                        System.out.println("d");
                         return Math.max(card1, card2);
                     }
                 } 
@@ -165,6 +163,7 @@ public class JoinOptimizer {
                 case GREATER_THAN_OR_EQ:
                 case LIKE:
                 {
+                    // range joins
                     double rtn = 0.3 * (double)(card1 * card2);
                     return (int)Math.ceil(rtn);
                 }
@@ -259,12 +258,14 @@ public class JoinOptimizer {
                 CostCard bestPlan = new CostCard();
                 bestPlan.cost = Double.MAX_VALUE;                
                 for (LogicalJoinNode sp : s) {
+                    // choose(k, k - 1) is equivalent to choose(k, 1)
                     CostCard plan = computeCostAndCardOfSubplan(stats, filterSelectivities,
                         sp, s, bestPlan.cost, pc);
                     if (plan != null) {
                         if (bestPlan.cost > plan.cost)
                             bestPlan = plan;
                         pc.addPlan(s, bestPlan.cost, bestPlan.card, bestPlan.plan);
+                        // store the computed bestPlan in PlanCache
                     }
                 }
             }
@@ -274,6 +275,7 @@ public class JoinOptimizer {
             printJoins(joins, pc, stats, filterSelectivities);
         
         return pc.getOrder(new HashSet<LogicalJoinNode>(joins));
+        // find the plan with all the join nodes in PlanCache
     }
 
     // ===================== Private Methods =================================
