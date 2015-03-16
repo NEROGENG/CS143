@@ -107,7 +107,7 @@ public class SeqScan implements DbIterator {
         for (int i = 0; i < temp.numFields(); i++) {
             buildtyp[i] = temp.getFieldType(i);     //copy type
             //field names are "prefixed with table alias string
-            buildstr[i] = this.alias + temp.getFieldName(i);
+            buildstr[i] = this.alias + "." + temp.getFieldName(i);
         }
         // some code goes here
 
