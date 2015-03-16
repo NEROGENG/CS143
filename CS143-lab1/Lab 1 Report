@@ -1,0 +1,10 @@
+Lab 1 Report 
+Jonathan Ong  	104135858
+Quanjie Geng	204160668	
+
+No changes to APIs.
+Design based off of paramters and return types of functions implemented.
+One current issue we have is our system test results.  It seems that our buffer pool cannot support test cases large in magnitude.  Without any additional functions implemented, our buffer pool can only get pages... it cannnot remove or reload additional pages. 
+Ample time was spent familiarizing ourselves with the lab and the flow of the program.  Difficulties were had when testing our implementation on the VMs. Each night, a file or two were implemented.  
+
+
